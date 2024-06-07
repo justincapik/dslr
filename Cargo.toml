@@ -1,6 +1,3 @@
-[package]
-name = "dslr"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
+[workspace]
+members = ["src/some_lib", "src/some_binary"]
+resolver = "2"
