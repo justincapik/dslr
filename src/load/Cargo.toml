@@ -1,0 +1,12 @@
+[package]
+name = "load"
+version = "0.1.0"
+edition = "2021"
+authors = [
+	"jucapik <jucapik@student.42.fr>",
+	"adelille <adelille@student.42.fr>",
+]
+description = "load csv as Polars DataFrame"
+
+[dependencies]
+polars = { version = "0.40.0", features = ["lazy"] }
