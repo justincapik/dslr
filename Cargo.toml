@@ -1,3 +1,3 @@
 [workspace]
-members = ["src/some_lib", "src/some_binary", "src/load"]
+members = ["src/load", "src/describe"]
 resolver = "2"
