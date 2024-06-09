@@ -29,8 +29,7 @@ pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>
 			series
 				.sum_reduce()?
 				.value()
-				.try_extract::<f64>()
-				.map_or(None, |f| Some(f)),
+				.try_extract::<f64>().ok(),
 			args,
 		);
 

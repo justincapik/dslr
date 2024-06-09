@@ -66,19 +66,19 @@ pub fn present(table: (Table, Vec<DataType>), _args: &Args) -> PolarsResult<()> 
 			Rows::first(),
 		));
 
-	println!("{}", table.to_string());
+	println!("{table}");
 
 	Ok(())
 }
 
 fn type_color(data_type: &DataType) -> Color {
 	if data_type.is_float() {
-		return Color::new("\u{1b}[1;36m", "\u{1b}[0m");
+		Color::new("\u{1b}[1;36m", "\u{1b}[0m")
 	} else if data_type.is_integer() {
-		return Color::new("\u{1b}[1;34m", "\u{1b}[0m");
+		Color::new("\u{1b}[1;34m", "\u{1b}[0m")
 	} else if data_type.is_string() {
-		return Color::new("\u{1b}[1;32m", "\u{1b}[0m");
+		Color::new("\u{1b}[1;32m", "\u{1b}[0m")
 	} else {
-		return Color::new("\u{1b}[1;2;3m", "\u{1b}[0m");
+		Color::new("\u{1b}[1;2;3m", "\u{1b}[0m")
 	}
 }
