@@ -24,14 +24,7 @@ pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>
 		let median = &to_string(series.median(), args);
 		// let q1 = series.quantile(0.25)?;
 		// let q3 = series.quantile(0.75)?;
-		// let sum = &to_string(series.sum_reduce()?
-		let sum = &to_string(
-			series
-				.sum_reduce()?
-				.value()
-				.try_extract::<f64>().ok(),
-			args,
-		);
+		let sum = &to_string(series.sum_reduce()?.value().try_extract::<f64>().ok(), args);
 
 		builder.push_record([name, dtype, min, max, mean, median, sum]);
 	}

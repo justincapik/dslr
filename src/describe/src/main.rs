@@ -13,7 +13,7 @@ pub struct Args {
 	path: PathBuf,
 
 	/// round the output to the given number of decimal places
-	#[clap(long, default_value = "2")]
+	#[clap(long, short, default_value = "2")]
 	round: u8,
 	/*
 	/// rotate the output 90 degrees
