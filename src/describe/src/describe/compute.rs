@@ -3,6 +3,19 @@ use tabled::{builder::Builder, Table};
 
 use crate::Args;
 
+struct Analyze {
+	name: String,
+	dtype: DataType,
+
+	min: Option<f64>,
+	max: Option<f64>,
+	mean: Option<f64>,
+	median: Option<f64>,
+	sum: Option<f64>,
+}
+
+type TableRecord<'s> = [&'s str; 7];
+
 pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>)> {
 	let mut types = Vec::with_capacity(df.width());
 
@@ -30,6 +43,58 @@ pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>
 	}
 
 	Ok((builder.build(), types))
+}
+
+impl From<&Series> for Analyze {
+	fn from(series: &Series) -> Self {
+		let name = series.name().to_owned();
+		let dtype = series.dtype().to_owned();
+
+		let mut min = None;
+		let mut max = None;
+		let mut mean = None;
+		let mut median = None;
+		let mut sum = None;
+
+		for (i, value) in series.into_iter().enumerate() {
+			let value = value?;
+			if i == 0 {
+				min = Some(value);
+				max = Some(value);
+				mean = Some(value);
+				median = Some(value);
+				sum = Some(value);
+			} else {
+				min = min.map(|min| min.min(value));
+				max = max.map(|max| max.max(value));
+				mean = mean.map(|mean| mean + value);
+				median = median.map(|median| median + value);
+				sum = sum.map(|sum| sum + value);
+			}
+		}
+
+		Self {
+			name: series.name().to_owned(),
+			dtype: series.dtype().to_owned(),
+
+			min: series.min().unwrap(),
+			max: series.max().unwrap(),
+			mean: series.mean(),
+			median: series.median(),
+			sum: series
+				.sum_reduce()
+				.unwrap()
+				.value()
+				.try_extract::<f64>()
+				.ok(),
+		}
+	}
+}
+
+impl Analyze {
+	fn headers() -> TableRecord<'static> {
+		["column", "type", "min", "max", "mean", "median", "sum"]
+	}
 }
 
 fn to_string(n: Option<f64>, args: &Args) -> String {
