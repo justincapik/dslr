@@ -50,43 +50,44 @@ impl From<&Series> for Analyze {
 		let name = series.name().to_owned();
 		let dtype = series.dtype().to_owned();
 
-		let mut min = None;
-		let mut max = None;
-		let mut mean = None;
-		let mut median = None;
-		let mut sum = None;
+		let mut min: Option<f64> = None;
+		let mut max: Option<f64> = None;
+		let mut sum: Option<f64> = None;
 
-		for (i, value) in series.into_iter().enumerate() {
-			let value = value?;
-			if i == 0 {
-				min = Some(value);
-				max = Some(value);
-				mean = Some(value);
-				median = Some(value);
-				sum = Some(value);
-			} else {
-				min = min.map(|min| min.min(value));
-				max = max.map(|max| max.max(value));
-				mean = mean.map(|mean| mean + value);
-				median = median.map(|median| median + value);
-				sum = sum.map(|sum| sum + value);
+		if dtype.is_numeric() {
+			for chunk in series.f64() {
+				dbg!(chunk);
+
+				let mut first = true;
+				for value in chunk {
+					let Some(value) = value else {
+						continue;
+					};
+
+					if first {
+						min = Some(value);
+						max = Some(value);
+						sum = Some(value);
+
+						first = false;
+					} else {
+						min = min.map(|min| min.min(value));
+						max = max.map(|max| max.max(value));
+						sum = sum.map(|sum| sum + value);
+					}
+				}
 			}
 		}
 
 		Self {
-			name: series.name().to_owned(),
-			dtype: series.dtype().to_owned(),
+			name,
+			dtype,
 
-			min: series.min().unwrap(),
-			max: series.max().unwrap(),
+			min,
+			max,
 			mean: series.mean(),
 			median: series.median(),
-			sum: series
-				.sum_reduce()
-				.unwrap()
-				.value()
-				.try_extract::<f64>()
-				.ok(),
+			sum,
 		}
 	}
 }
@@ -103,4 +104,59 @@ fn to_string(n: Option<f64>, args: &Args) -> String {
 	};
 
 	format!("{:.1$}", n, args.round as usize)
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_analyze_basic() {
+		let s = Series::new("a", &[1.0, 2.0, 3.0, 4.0, 5.0]);
+		let a = Analyze::from(&s);
+
+		assert_eq!(a.min, Some(1.0));
+		assert_eq!(a.min, s.min().unwrap());
+		assert_eq!(a.max, Some(5.0));
+		assert_eq!(a.mean, Some(3.0));
+		assert_eq!(a.median, Some(3.0));
+		assert_eq!(a.sum, Some(15.0));
+	}
+
+	#[test]
+	fn test_analyze_negative() {
+		let s = Series::new("a", &[-42.0, -5.0, 0.0, 1.0, 2.0, 1001.0]);
+		let a = Analyze::from(&s);
+
+		assert_eq!(a.min, Some(-42.0));
+		assert_eq!(a.max, Some(1002.0));
+		assert_eq!(a.mean, Some(159.5));
+		assert_eq!(a.median, Some(1.5));
+		assert_eq!(a.sum, Some(957.0));
+	}
+
+	#[test]
+	fn test_analyze_empty() {
+		let empty: [f64; 0] = [];
+		let s = Series::new("a", &empty);
+		let a = Analyze::from(&s);
+
+		assert_eq!(a.min, None);
+		assert_eq!(a.max, None);
+		assert_eq!(a.mean, None);
+		assert_eq!(a.median, None);
+		assert_eq!(a.sum, None);
+	}
+
+	#[test]
+	fn test_analyze_str() {
+		let s = Series::new("a", &["a", "b", "c"]);
+		let a = Analyze::from(&s);
+
+		assert_eq!(a.min, None);
+		assert_eq!(a.max, None);
+		assert_eq!(a.mean, None);
+		assert_eq!(a.median, None);
+		assert_eq!(a.sum, None);
+	}
 }

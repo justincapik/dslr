@@ -11,5 +11,5 @@ description = "describe data from a csv (mean, std, min, max, etc.)"
 [dependencies]
 load = { path = "../load" }
 clap = { version = "4", features = ["derive"] }
-polars = { version = "0.40.0", features = ["lazy"] }
+polars = { version = "0.40.0" }
 tabled = "0.15"
