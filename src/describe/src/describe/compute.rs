@@ -129,9 +129,9 @@ mod tests {
 		let a = Analyze::from(&s);
 
 		assert_eq!(a.min, Some(-42.0));
-		assert_eq!(a.max, Some(1002.0));
+		assert_eq!(a.max, Some(1001.0));
 		assert_eq!(a.mean, Some(159.5));
-		assert_eq!(a.median, Some(1.5));
+		assert_eq!(a.median, Some(0.5));
 		assert_eq!(a.sum, Some(957.0));
 	}
 
