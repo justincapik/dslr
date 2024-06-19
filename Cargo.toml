@@ -1,3 +1,9 @@
 [workspace]
 members = ["src/some_lib", "src/some_binary", "src/data_visualization"]
 resolver = "2"
+
+
+[profile.dev]
+opt-level = 1
+[profile.dev.package."*"]
+opt-level = 3
