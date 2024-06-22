@@ -18,7 +18,7 @@ struct Analyze {
 	sum: Option<f64>,
 }
 
-type TableRecord<'s> = [&'s str; 10];
+type TableRecord<'s> = [&'s str; 9];
 
 pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>)> {
 	let mut types = Vec::with_capacity(df.width());
@@ -32,7 +32,7 @@ pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>
 
 		let name = truncate(&analyze.name, 10);
 
-		builder.push_record([
+		let record: TableRecord = [
 			&name,
 			&analyze.dtype.to_string(),
 			&to_string(analyze.min, args),
@@ -42,8 +42,8 @@ pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>
 			&to_string(analyze.q1, args),
 			&to_string(analyze.q3, args),
 			&to_string(analyze.std, args),
-			&to_string(analyze.sum, args),
-		]);
+		];
+		builder.push_record(record);
 
 		types.push(analyze.dtype);
 	}
@@ -114,10 +114,10 @@ impl From<&Series> for Analyze {
 			arr[arr.len() / 2]
 		};
 		let (q1, q3) = if arr.len() % 4 == 0 {
-			let mid = arr.len() / 4;
+			let quarter = arr.len() / 4;
 			(
-				(arr[mid - 1] + arr[mid]) / 2.0,
-				(arr[mid * 3 - 1] + arr[mid * 3]) / 2.0,
+				(arr[quarter - 1] + arr[quarter]) / 2.0,
+				(arr[quarter * 3 - 1] + arr[quarter * 3]) / 2.0,
 			)
 		} else {
 			(arr[arr.len() / 4], arr[arr.len() * 3 / 4])
@@ -144,7 +144,7 @@ impl From<&Series> for Analyze {
 
 impl Analyze {
 	const HEADERS: TableRecord<'static> = [
-		"column", "T", "min", "max", "mean", "median", "q1", "q3", "std", "sum",
+		"column", "T", "min", "max", "mean", "median", "q1", "q3", "std",
 	];
 }
 
@@ -177,11 +177,11 @@ mod tests {
 			max: series.max().unwrap(),
 			mean: series.mean(),
 			median: series.median(),
-			q1: match series.quantile_reduce(0.25, QuantileInterpolOptions::Linear) {
+			q1: match series.quantile_reduce(0.25, QuantileInterpolOptions::Lower) {
 				Ok(x) => x.value().try_extract::<f64>().ok(),
 				_ => None,
 			},
-			q3: match series.quantile_reduce(0.25, QuantileInterpolOptions::Linear) {
+			q3: match series.quantile_reduce(0.75, QuantileInterpolOptions::Higher) {
 				Ok(x) => x.value().try_extract::<f64>().ok(),
 				_ => None,
 			},
@@ -272,8 +272,8 @@ mod tests {
 			max: Some(1001.0),
 			mean: Some(159.5),
 			median: Some(0.5),
-			q1: Some(-2.5),
-			q3: Some(1.5),
+			q1: Some(-5.0),
+			q3: Some(2.0),
 			std: Some(376.64162896135986),
 			sum: Some(957.0),
 		};
@@ -301,8 +301,8 @@ mod tests {
 			max: Some(5.0),
 			mean: Some(3.0),
 			median: Some(3.0),
-			q1: Some(2.0),
-			q3: Some(4.0),
+			q1: Some(1.0),
+			q3: Some(5.0),
 			std: Some(1.632993161855452),
 			sum: Some(9.0),
 		};
