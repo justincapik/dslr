@@ -24,32 +24,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 			.collect()?
 	);
 
-	let flying: Vec<f64> = data
-		.column("Flying")
-		.unwrap()
-		.f64()?
-		.into_iter()
-		.filter(|x| x.is_some())
-		.map(|x| x.unwrap())
-		.collect();
-	let potions: Vec<f64> = data
-		.column("Potions")
-		.unwrap()
-		.f64()?
-		.into_iter()
-		.filter(|x| x.is_some())
-		.map(|x| x.unwrap())
-		.collect();
-	let charms: Vec<f64> = data
-		.column("Charms")
-		.unwrap()
-		.f64()?
-		.into_iter()
-		.filter(|x| x.is_some())
-		.map(|x| x.unwrap())
-		.collect();
-
-	plot::simple_scatter_plot(flying, potions, charms);
+	plot::simple_scatter_plot(data)?;
 
 	plot::normalized_histogram();
 	plot::test_scatter_plot();

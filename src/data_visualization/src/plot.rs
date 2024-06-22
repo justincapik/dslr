@@ -15,8 +15,12 @@ use plotly::common::{ErrorData, ErrorType, Orientation};
 use plotly::histogram::{Bins, Cumulative, HistFunc, HistNorm};
 use plotly::layout::{BoxMode, Margin};
 use plotly::{Bar, BoxPlot, Histogram};
+use polars::error::PolarsError;
+use polars::frame::DataFrame;
 use rand;
 use rand_distr::{Distribution, Normal, Uniform};
+
+use std::{error::Error, process};
 
 // Histograms
 fn sample_normal_distribution(n: usize, mean: f64, std_dev: f64) -> Vec<f64> {
@@ -38,20 +42,45 @@ fn sample_uniform_distribution(n: usize, lb: f64, ub: f64) -> Vec<f64> {
 	v
 }
 
-pub fn simple_scatter_plot(flying: Vec<f64>, potions: Vec<f64>, charms: Vec<f64>) {
+fn make_trace(plot: &mut Plot, name: &str, data: DataFrame) -> Result<(), Box<dyn Error>> {
+	let mut col: Vec<f64> = data
+		.column(name)
+		.unwrap()
+		.f64()?
+		.into_iter()
+		.filter(|x| x.is_some())
+		.map(|x| x.unwrap())
+		.collect();
+
+	let min = 0.0;
+	let max = col.len() as f64;
+	let n = (max - min) as usize;
+	col.sort_by(|a, b| a.partial_cmp(b).unwrap());
+	let t: Vec<f64> = col.iter().copied().rev().collect();
+	//let t = sample_uniform_distribution(n, min, max);
+	let y = col;
+
+	let trace = Scatter::new(t, y)
+		.opacity(0.5)
+		.name(name)
+		.mode(Mode::Markers);
+	plot.add_trace(trace);
+
+	Ok(())
+}
+
+pub fn simple_scatter_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 	let mut plot = Plot::new();
 
-	for col in vec![flying, potions, charms] {
-		let min = 0.0;
-		let max = col.len() as f64;
-		let n = (max - min) as usize;
-		let t: Vec<f64> = col.iter().copied().rev().collect();
-		let y = col;
-
-		let trace = Scatter::new(t, y).mode(Mode::Markers);
-		plot.add_trace(trace);
+	for name in data.get_column_names() {
+		if name != "Arithmancy" {
+			make_trace(&mut plot, name, data.clone());
+		}
 	}
+
 	plot.write_image("data_scatter.png", ImageFormat::PNG, 800, 600, 1.0);
+
+	Ok(())
 }
 
 pub fn histogram_2_1(houses: Vec<Vec<f64>>, house_names: Vec<String>) {
