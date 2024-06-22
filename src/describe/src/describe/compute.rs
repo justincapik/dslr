@@ -18,32 +18,34 @@ struct Analyze {
 	sum: Option<f64>,
 }
 
-type TableRecord<'s> = [&'s str; 7];
+type TableRecord<'s> = [&'s str; 8];
 
 pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>)> {
 	let mut types = Vec::with_capacity(df.width());
 
 	let mut builder = Builder::default();
 
-	builder.push_record(["column", "type", "min", "max", "mean", "median", "sum"]);
+	builder.push_record(Analyze::HEADERS);
 
 	for series in df.get_columns() {
-		let name = series.name();
+		let analyze = Analyze::from(series);
 
-		let dtype = series.dtype();
-		types.push(dtype.clone());
-		let dtype = &dtype.to_string();
+		let name = truncate(&analyze.name, 10);
 
-		let min = &to_string(series.min()?, args);
-		let max = &to_string(series.max()?, args);
-		let mean = &to_string(series.mean(), args);
-		// let std = series.std();
-		let median = &to_string(series.median(), args);
-		// let q1 = series.quantile(0.25)?;
-		// let q3 = series.quantile(0.75)?;
-		let sum = &to_string(series.sum_reduce()?.value().try_extract::<f64>().ok(), args);
+		builder.push_record([
+			&name,
+			&analyze.dtype.to_string(),
+			&to_string(analyze.min, args),
+			&to_string(analyze.max, args),
+			&to_string(analyze.mean, args),
+			&to_string(analyze.median, args),
+			// q1
+			// q3
+			&to_string(analyze.std, args),
+			&to_string(analyze.sum, args),
+		]);
 
-		builder.push_record([name, dtype, min, max, mean, median, sum]);
+		types.push(analyze.dtype);
 	}
 
 	Ok((builder.build(), types))
@@ -77,6 +79,8 @@ impl From<&Series> for Analyze {
 		}
 
 		let mut arr = series
+			.cast(&DataType::Float64)
+			.expect("could not cast series to f64")
 			.f64()
 			.expect("could not extract series as f64 iterator")
 			.into_iter()
@@ -128,9 +132,16 @@ impl From<&Series> for Analyze {
 }
 
 impl Analyze {
-	fn headers() -> TableRecord<'static> {
-		["column", "type", "min", "max", "mean", "median", "sum"]
+	const HEADERS: TableRecord<'static> =
+		["column", "T", "min", "max", "mean", "median", "std", "sum"];
+}
+
+fn truncate(s: &str, len: usize) -> String {
+	if s.len() <= len {
+		return s.to_owned();
 	}
+
+	format!("{}…", &s[..len - 1])
 }
 
 fn to_string(n: Option<f64>, args: &Args) -> String {
@@ -145,43 +156,53 @@ fn to_string(n: Option<f64>, args: &Args) -> String {
 mod tests {
 	use super::*;
 
+	fn polars_expect(name: String, dtype: DataType, series: Series) -> Analyze {
+		Analyze {
+			name,
+			dtype,
+
+			min: series.min().unwrap(),
+			max: series.max().unwrap(),
+			mean: series.mean(),
+			median: series.median(),
+			// q1
+			// q3
+			std: series.std(0),
+			sum: match series.sum_reduce() {
+				Ok(x) => x
+					.value()
+					.try_extract::<f64>()
+					.ok()
+					.map(|x| if x == 0.0 { None } else { Some(x) })
+					.flatten(),
+				_ => None,
+			},
+		}
+	}
+
 	#[test]
 	fn test_analyze_basic() {
 		let name = String::from("a");
+		let dtype = DataType::Float64;
 		let s = Series::new(&name, &[1.0, 2.0, 3.0, 4.0, 5.0]);
+
 		let a = Analyze::from(&s);
 
 		let expect = Analyze {
 			name: name.clone(),
-			dtype: DataType::Float64,
+			dtype: dtype.clone(),
 
 			min: Some(1.0),
 			max: Some(5.0),
 			mean: Some(3.0),
 			median: Some(3.0),
-			std: Some(1.5811388),
+			std: Some(1.4142135623730951),
 			sum: Some(15.0),
 		};
 
 		assert_eq!(a, expect);
 
-		let polars_expect = Analyze {
-			name,
-			dtype: DataType::Float64,
-
-			min: Some(s.min().unwrap().unwrap()),
-			max: Some(s.max().unwrap().unwrap()),
-			mean: Some(s.mean().unwrap()),
-			median: Some(s.median().unwrap()),
-			std: Some(s.std(0).unwrap()),
-			sum: Some(
-				s.sum_reduce()
-					.unwrap()
-					.value()
-					.try_extract::<f64>()
-					.unwrap(),
-			),
-		};
+		let polars_expect = polars_expect(name, dtype, s);
 
 		assert_eq!(a, polars_expect);
 	}
@@ -189,55 +210,96 @@ mod tests {
 	#[test]
 	fn test_analyze_negative() {
 		let name = String::from("a");
+		let dtype = DataType::Float64;
 		let s = Series::new(&name, &[-42.0, -5.0, 0.0, 1.0, 2.0, 1001.0]);
+
 		let a = Analyze::from(&s);
 
 		let expect = Analyze {
-			name,
-			dtype: DataType::Float64,
+			name: name.clone(),
+			dtype: dtype.clone(),
 
 			min: Some(-42.0),
 			max: Some(1001.0),
 			mean: Some(159.5),
 			median: Some(0.5),
-			std: Some(412.59023),
+			std: Some(376.64162896135986),
 			sum: Some(957.0),
 		};
 
 		assert_eq!(a, expect);
+
+		let polars_expect = polars_expect(name, dtype, s);
+
+		assert_eq!(a, polars_expect);
 	}
 
 	#[test]
 	fn test_analyze_option() {
 		let name = String::from("a");
+		let dtype = DataType::Float64;
 		let s = Series::new(&name, &[Some(1.0), None, Some(3.0), None, Some(5.0)]);
+
 		let a = Analyze::from(&s);
 
 		let expect = Analyze {
-			name,
-			dtype: DataType::Float64,
+			name: name.clone(),
+			dtype: dtype.clone(),
 
 			min: Some(1.0),
 			max: Some(5.0),
 			mean: Some(3.0),
 			median: Some(3.0),
-			std: Some(1.5811388),
+			std: Some(1.632993161855452),
 			sum: Some(9.0),
 		};
 
 		assert_eq!(a, expect);
+
+		let polars_expect = polars_expect(name, dtype, s);
+
+		assert_eq!(a, polars_expect);
+	}
+
+	#[test]
+	fn test_analyze_int() {
+		let name = String::from("a");
+		let dtype = DataType::Int32;
+		let s = Series::new(&name, &[1, 2, 3, 4, 5]);
+
+		let a = Analyze::from(&s);
+
+		let expect = Analyze {
+			name: name.clone(),
+			dtype: dtype.clone(),
+
+			min: Some(1.0),
+			max: Some(5.0),
+			mean: Some(3.0),
+			median: Some(3.0),
+			std: Some(1.4142135623730951),
+			sum: Some(15.0),
+		};
+
+		assert_eq!(a, expect);
+
+		let polars_expect = polars_expect(name, dtype, s);
+
+		assert_eq!(a, polars_expect);
 	}
 
 	#[test]
 	fn test_analyze_empty() {
 		let name = String::from("a");
+		let dtype = DataType::Float64;
 		let empty: [f64; 0] = [];
 		let s = Series::new(&name, &empty);
+
 		let a = Analyze::from(&s);
 
 		let expect = Analyze {
-			name,
-			dtype: DataType::Float64,
+			name: name.clone(),
+			dtype: dtype.clone(),
 
 			min: None,
 			max: None,
@@ -248,17 +310,23 @@ mod tests {
 		};
 
 		assert_eq!(a, expect);
+
+		let polars_expect = polars_expect(name, dtype, s);
+
+		assert_eq!(a, polars_expect);
 	}
 
 	#[test]
 	fn test_analyze_str() {
 		let name = String::from("a");
+		let dtype = DataType::String;
 		let s = Series::new(&name, &["a", "b", "c"]);
+
 		let a = Analyze::from(&s);
 
 		let expect = Analyze {
-			name,
-			dtype: DataType::String,
+			name: name.clone(),
+			dtype: dtype.clone(),
 
 			min: None,
 			max: None,
@@ -269,5 +337,9 @@ mod tests {
 		};
 
 		assert_eq!(a, expect);
+
+		let polars_expect = polars_expect(name, dtype, s);
+
+		assert_eq!(a, polars_expect);
 	}
 }
