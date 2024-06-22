@@ -92,19 +92,12 @@ impl From<&Series> for Analyze {
 
 		arr.sort_by(|a, b| a.total_cmp(b));
 
-		let Some(first) = arr.first().copied() else {
+		let Some(min) = arr.first().copied() else {
 			return ret;
 		};
+		let max = arr.last().copied().unwrap();
 
-		let mut min = first;
-		let mut max = first;
-		let mut sum = first;
-
-		for value in arr.iter().skip(1) {
-			min = min.min(*value);
-			max = max.max(*value);
-			sum += value;
-		}
+		let sum: f64 = arr.iter().sum();
 
 		let mean = sum / arr.len() as f64;
 		let median = if arr.len() % 2 == 0 {
