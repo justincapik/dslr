@@ -113,6 +113,15 @@ impl From<&Series> for Analyze {
 		} else {
 			arr[arr.len() / 2]
 		};
+		let (q1, q3) = if arr.len() % 4 == 0 {
+			let mid = arr.len() / 4;
+			(
+				(arr[mid - 1] + arr[mid]) / 2.0,
+				(arr[mid * 3 - 1] + arr[mid * 3]) / 2.0,
+			)
+		} else {
+			(arr[arr.len() / 4], arr[arr.len() * 3 / 4])
+		};
 
 		let mut std_sum = 0.0;
 		for value in arr.iter() {
@@ -124,8 +133,8 @@ impl From<&Series> for Analyze {
 		ret.max = Some(max);
 		ret.mean = Some(mean);
 		ret.median = Some(median);
-		// q1
-		// q3
+		ret.q1 = Some(q1);
+		ret.q3 = Some(q3);
 		ret.std = Some(std);
 		ret.sum = Some(sum);
 
