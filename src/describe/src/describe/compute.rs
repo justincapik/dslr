@@ -12,13 +12,13 @@ struct Analyze {
 	max: Option<f64>,
 	mean: Option<f64>,
 	median: Option<f64>,
-	// q1
-	// q3
+	q1: Option<f64>,
+	q3: Option<f64>,
 	std: Option<f64>,
 	sum: Option<f64>,
 }
 
-type TableRecord<'s> = [&'s str; 8];
+type TableRecord<'s> = [&'s str; 10];
 
 pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>)> {
 	let mut types = Vec::with_capacity(df.width());
@@ -39,8 +39,8 @@ pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>
 			&to_string(analyze.max, args),
 			&to_string(analyze.mean, args),
 			&to_string(analyze.median, args),
-			// q1
-			// q3
+			&to_string(analyze.q1, args),
+			&to_string(analyze.q3, args),
 			&to_string(analyze.std, args),
 			&to_string(analyze.sum, args),
 		]);
@@ -70,6 +70,8 @@ impl From<&Series> for Analyze {
 			max: None,
 			mean: None,
 			median: None,
+			q1: None,
+			q3: None,
 			std: None,
 			sum: None,
 		};
@@ -132,8 +134,9 @@ impl From<&Series> for Analyze {
 }
 
 impl Analyze {
-	const HEADERS: TableRecord<'static> =
-		["column", "T", "min", "max", "mean", "median", "std", "sum"];
+	const HEADERS: TableRecord<'static> = [
+		"column", "T", "min", "max", "mean", "median", "q1", "q3", "std", "sum",
+	];
 }
 
 fn truncate(s: &str, len: usize) -> String {
@@ -165,8 +168,14 @@ mod tests {
 			max: series.max().unwrap(),
 			mean: series.mean(),
 			median: series.median(),
-			// q1
-			// q3
+			q1: match series.quantile_reduce(0.25, QuantileInterpolOptions::Linear) {
+				Ok(x) => x.value().try_extract::<f64>().ok(),
+				_ => None,
+			},
+			q3: match series.quantile_reduce(0.25, QuantileInterpolOptions::Linear) {
+				Ok(x) => x.value().try_extract::<f64>().ok(),
+				_ => None,
+			},
 			std: series.std(0),
 			sum: match series.sum_reduce() {
 				Ok(x) => x
@@ -196,6 +205,8 @@ mod tests {
 			max: Some(5.0),
 			mean: Some(3.0),
 			median: Some(3.0),
+			q1: Some(2.0),
+			q3: Some(4.0),
 			std: Some(1.4142135623730951),
 			sum: Some(15.0),
 		};
@@ -223,6 +234,8 @@ mod tests {
 			max: Some(1001.0),
 			mean: Some(159.5),
 			median: Some(0.5),
+			q1: Some(-2.5),
+			q3: Some(1.5),
 			std: Some(376.64162896135986),
 			sum: Some(957.0),
 		};
@@ -250,6 +263,8 @@ mod tests {
 			max: Some(5.0),
 			mean: Some(3.0),
 			median: Some(3.0),
+			q1: Some(2.0),
+			q3: Some(4.0),
 			std: Some(1.632993161855452),
 			sum: Some(9.0),
 		};
@@ -277,6 +292,8 @@ mod tests {
 			max: Some(5.0),
 			mean: Some(3.0),
 			median: Some(3.0),
+			q1: Some(2.0),
+			q3: Some(4.0),
 			std: Some(1.4142135623730951),
 			sum: Some(15.0),
 		};
@@ -305,6 +322,8 @@ mod tests {
 			max: None,
 			mean: None,
 			median: None,
+			q1: None,
+			q3: None,
 			std: None,
 			sum: None,
 		};
@@ -332,6 +351,8 @@ mod tests {
 			max: None,
 			mean: None,
 			median: None,
+			q1: None,
+			q3: None,
 			std: None,
 			sum: None,
 		};
