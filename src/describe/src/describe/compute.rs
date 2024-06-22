@@ -219,6 +219,35 @@ mod tests {
 	}
 
 	#[test]
+	fn test_analyze_unsorted() {
+		let name = String::from("a");
+		let dtype = DataType::Float64;
+		let s = Series::new(&name, &[5.0, 2.0, 4.0, 1.0, 3.0]);
+
+		let a = Analyze::from(&s);
+
+		let expect = Analyze {
+			name: name.clone(),
+			dtype: dtype.clone(),
+
+			min: Some(1.0),
+			max: Some(5.0),
+			mean: Some(3.0),
+			median: Some(3.0),
+			q1: Some(2.0),
+			q3: Some(4.0),
+			std: Some(1.4142135623730951),
+			sum: Some(15.0),
+		};
+
+		assert_eq!(a, expect);
+
+		let polars_expect = polars_expect(name, dtype, s);
+
+		assert_eq!(a, polars_expect);
+	}
+
+	#[test]
 	fn test_analyze_negative() {
 		let name = String::from("a");
 		let dtype = DataType::Float64;
