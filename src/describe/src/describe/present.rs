@@ -43,15 +43,11 @@ pub fn present(table: (Table, Vec<DataType>), _args: &Args) -> PolarsResult<()> 
 				.modify(target, Alignment::center());
 		}
 
-		todo!("use `let target = Cell(1 + i, 1);` to get the target cell");
-		let target = (1 + i, 1);
+		let target = Cell::from((1 + i, 1));
 
-		table.modify(Cell::from(target), Alignment::center());
+		table.modify(target, Alignment::center());
 
-		table.with(Colorization::exact(
-			[type_color(data_type)],
-			Cell::from(target),
-		));
+		table.with(Colorization::exact([type_color(data_type)], target));
 	}
 
 	table
