@@ -28,7 +28,7 @@ pub fn compute(df: DataFrame, args: &Args) -> PolarsResult<(Table, Vec<DataType>
 	builder.push_record(Analyze::HEADERS);
 
 	for series in df.get_columns() {
-		if !args.full && !series.dtype().is_float() {
+		if !args.full && !series.dtype().is_numeric() {
 			continue;
 		}
 
