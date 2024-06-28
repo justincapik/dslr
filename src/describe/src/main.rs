@@ -12,6 +12,10 @@ pub struct Args {
 	#[clap(default_value = "datasets/train.csv")]
 	path: PathBuf,
 
+	/// print a full summary of the csv file (including all columns)
+	#[clap(long, short)]
+	full: bool,
+
 	/// round the output to the given number of decimal places
 	#[clap(long, short, default_value = "2")]
 	round: u8,
