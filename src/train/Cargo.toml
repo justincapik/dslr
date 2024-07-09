@@ -1,0 +1,17 @@
+[package]
+name = "train"
+version = "0.1.0"
+edition = "2021"
+authors = [
+	"jucapik <jucapik@student.42.fr>",
+	"adelille <adelille@student.42.fr>",
+]
+description = "train model based on logistic regression (one vs all)"
+
+[dependencies]
+load = { path = "../load" }
+clap = { version = "4", features = ["derive"] }
+polars = { version = "0.41.0", default-features = false, features = [
+	"performant",
+	"lazy",
+] }
