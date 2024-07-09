@@ -20,5 +20,7 @@ fn main() -> PolarsResult<()> {
 
 	dbg!(&args.path, &args.ouput);
 
+	let df = load::load(&args.path)?;
+
 	Ok(())
 }
