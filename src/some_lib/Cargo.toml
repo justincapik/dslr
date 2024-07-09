@@ -1,8 +1,0 @@
-[package]
-name = "estimate"
-version = "0.1.0"
-edition = "2021"
-authors = ["adelille"]
-description = "estimate y based on x thanks to theta0 and theta1"
-
-[dependencies]
