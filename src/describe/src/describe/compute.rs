@@ -90,8 +90,7 @@ impl From<&Series> for Analyze {
 			.f64()
 			.expect("could not extract series as f64 iterator")
 			.into_iter()
-			.filter(|x| x.is_some())
-			.map(|x| x.unwrap())
+			.flatten()
 			.collect::<Vec<f64>>();
 
 		arr.sort_by(|a, b| a.total_cmp(b));
@@ -184,12 +183,13 @@ mod tests {
 			},
 			std: series.std(0),
 			sum: match series.sum_reduce() {
-				Ok(x) => x
-					.value()
-					.try_extract::<f64>()
-					.ok()
-					.map(|x| if x == 0.0 { None } else { Some(x) })
-					.flatten(),
+				Ok(x) => x.value().try_extract::<f64>().ok().and_then(|x| {
+					if x == 0.0 {
+						None
+					} else {
+						Some(x)
+					}
+				}),
 				_ => None,
 			},
 		}
@@ -213,7 +213,7 @@ mod tests {
 			median: Some(3.0),
 			q1: Some(2.0),
 			q3: Some(4.0),
-			std: Some(1.4142135623730951),
+			std: Some(std::f64::consts::SQRT_2),
 			sum: Some(15.0),
 		};
 
@@ -242,7 +242,7 @@ mod tests {
 			median: Some(3.0),
 			q1: Some(2.0),
 			q3: Some(4.0),
-			std: Some(1.4142135623730951),
+			std: Some(std::f64::consts::SQRT_2),
 			sum: Some(15.0),
 		};
 
@@ -329,7 +329,7 @@ mod tests {
 			median: Some(3.0),
 			q1: Some(2.0),
 			q3: Some(4.0),
-			std: Some(1.4142135623730951),
+			std: Some(std::f64::consts::SQRT_2),
 			sum: Some(15.0),
 		};
 
