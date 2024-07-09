@@ -1,4 +1,5 @@
-mod describe;
+mod compute;
+mod present;
 
 use std::path::PathBuf;
 
@@ -31,5 +32,6 @@ fn main() -> PolarsResult<()> {
 
 	let df = load::load(&args.path)?;
 
-	describe::describe(df, &args)
+	let table = compute::compute(df, &args)?;
+	present::present(table, &args)
 }
