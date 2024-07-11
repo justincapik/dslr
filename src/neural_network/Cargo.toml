@@ -1,15 +1,14 @@
 [package]
-name = "model"
+name = "neural_network"
 version = "0.1.0"
 edition = "2021"
 authors = [
 	"jucapik <jucapik@student.42.fr>",
 	"adelille <adelille@student.42.fr>",
 ]
-description = "library that represents a model for a logistic regression (one vs all)"
+description = "neural network implementation"
 
 [dependencies]
-load = { path = "../load" }
 polars = { version = "0.41.0", default-features = false, features = [
 	"performant",
 ] }

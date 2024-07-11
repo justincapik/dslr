@@ -1,5 +1,5 @@
 [workspace]
-members = ["src/load", "src/describe", "src/train"]
+members = ["src/load", "src/describe", "src/neural_network", "src/train"]
 resolver = "2"
 
 [profile.dev]
