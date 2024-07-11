@@ -12,13 +12,13 @@ pub struct Args {
 
 	/// path to write the model to
 	#[clap(long, short, default_value = "model.csv")]
-	ouput: PathBuf,
+	output: PathBuf,
 }
 
 fn main() -> PolarsResult<()> {
 	let args = Args::parse();
 
-	dbg!(&args.path, &args.ouput);
+	dbg!(&args.path, &args.output);
 
 	let df = load::load(&args.path)?;
 

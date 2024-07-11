@@ -1,6 +1,6 @@
 use crate::Float;
 
-// TODO: derivate to be able to backpropagate
+// TODO: derivate to be able to back propagate
 
 pub type Activation = fn(Float) -> Float;
 
