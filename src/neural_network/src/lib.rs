@@ -17,7 +17,7 @@ impl NeuralNetwork {
 		let mut output = input;
 
 		for layer in &self.layers {
-			output = layer.process(&output);
+			output = layer.forward(&output);
 		}
 
 		output
