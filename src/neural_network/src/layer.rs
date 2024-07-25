@@ -1,4 +1,4 @@
-use crate::{activation, Activation, Float, Matrix};
+use crate::{Activation, Float, Matrix};
 
 pub struct Layer {
 	pub weight: Matrix,
