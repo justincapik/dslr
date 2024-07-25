@@ -1,4 +1,4 @@
-mod activation;
+pub mod activation;
 mod layer;
 mod matrix;
 
@@ -9,7 +9,7 @@ use matrix::Matrix;
 type Float = f32;
 
 pub struct NeuralNetwork {
-	layers: Vec<Layer>,
+	layers: Vec<Layer<A>>,
 }
 
 impl NeuralNetwork {

@@ -1,14 +1,22 @@
 use crate::{Activation, Float, Matrix};
 
-pub struct Layer {
+pub struct Layer<A: Activation> {
 	pub weight: Matrix,
 	pub bias: Vec<Float>,
-	pub activation: Activation,
+	pub activation: A,
 }
 
-impl Layer {
-	// input • weight + bias -> activation = output
-	pub fn forward(&self, input: &[Float]) -> Vec<Float> {
+pub struct Cache {
+	pub input: Vec<Float>,
+	pub weight: Matrix,
+	pub bias: Vec<Float>,
+	pub activation: Vec<Float>,
+}
+
+impl<A: Activation> Layer<A> {
+	/// input • weight + bias -> activation = output
+	// fn modular_forward<T>(&self, input: &[Float], activation: impl Fn(Float) -> T) -> Vec<T> {
+	fn modular_forward<T>(&self, input: &[Float], activation: fn(Float) -> T) -> Vec<T> {
 		assert_eq!(input.len(), self.weight.row);
 		assert_eq!(self.weight.col, self.bias.len());
 
@@ -22,11 +30,20 @@ impl Layer {
 				sum += input[r] * self.weight.data[r * self.weight.col + c];
 			}
 
-			output.push((self.activation)(sum + self.bias[c]));
+			output.push(activation(sum + self.bias[c]));
 		}
 
 		output
 	}
+
+	/// input • weight + bias -> activation = output
+	#[inline]
+	pub fn forward(&self, input: &[Float]) -> Vec<Float> {
+		// return self.modular_forward(input, |x| A::forward(x));
+		return self.modular_forward(input, A::forward);
+	}
+
+	// pub fn forward_cache
 
 	// pub fn backward
 }
@@ -35,7 +52,7 @@ impl Layer {
 mod tests {
 	use std::vec;
 
-	use crate::activation::relu;
+	use crate::activation::ReLU;
 
 	use super::*;
 
@@ -57,7 +74,7 @@ mod tests {
 		};
 
 		let input = vec![-1.0, 0.0, 0.5, 1.0];
-		let output = layer.process(&input);
+		let output = layer.forward(&input);
 
 		assert_eq!(output.len(), 5);
 		assert_eq!(output, vec![0.0, 0.0, 0.0, 0.75, 1.5]);
