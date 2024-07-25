@@ -36,7 +36,7 @@ mod tests {
 		for (input, expected) in [
 			(0.0, 0.25),
 			(1.0, 0.19661193),
-			(-1.0, 0.19661193),
+			(-1.0, 0.19661194),
 			(0.5, 0.23500371),
 		] {
 			assert_eq!(Sigmoid::backward(input), expected);

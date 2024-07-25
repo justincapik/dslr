@@ -9,15 +9,15 @@ use matrix::Matrix;
 type Float = f32;
 
 pub struct NeuralNetwork {
-	layers: Vec<Layer<A>>,
+	layers: Vec<Layer>,
 }
 
 impl NeuralNetwork {
-	pub fn forward(&self, input: Vec<Float>) -> Vec<Float> {
+	pub fn forward<A: Activation>(&self, input: Vec<Float>) -> Vec<Float> {
 		let mut output = input;
 
 		for layer in &self.layers {
-			output = layer.forward(&output);
+			output = layer.forward::<A>(&output);
 		}
 
 		output
