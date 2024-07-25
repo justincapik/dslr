@@ -1,24 +1,9 @@
 [workspace]
-<<<<<<< HEAD
 members = ["src/some_lib", "src/some_binary", "src/data_visualization"]
-||||||| 210f0f0
-members = ["src/some_lib", "src/some_binary"]
-=======
-members = ["src/load", "src/describe"]
->>>>>>> 5e70057e2fe91e8addad1ee3310bba9f25a2037e
 resolver = "2"
-<<<<<<< HEAD
 
 
 [profile.dev]
 opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3
-||||||| 210f0f0
-=======
-
-[profile.dev]
-opt-level = 1
-[profile.dev.package."*"]
-opt-level = 3
->>>>>>> 5e70057e2fe91e8addad1ee3310bba9f25a2037e
