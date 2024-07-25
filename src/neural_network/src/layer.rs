@@ -70,7 +70,23 @@ impl Layer {
 		)
 	}
 
-	// pub fn backward
+	pub fn backward<A: Activation>(
+		&mut self,
+		cache: Cache<A>,
+		d_output: Vec<Float>,
+		learning_rate: Float,
+	) {
+		for (i, d_output) in d_output.iter().enumerate() {
+			let d_pre_activation = d_output * A::backward(cache.pre_activation[i]);
+
+			for r in 0..self.weight.row {
+				self.weight.data[r * self.weight.col + i] -=
+					learning_rate * d_pre_activation * cache.input[r];
+			}
+
+			self.bias[i] -= learning_rate * d_pre_activation;
+		}
+	}
 }
 
 #[cfg(test)]
@@ -129,5 +145,49 @@ mod tests {
 		assert_eq!(cache.weight, layer.weight);
 		assert_eq!(cache.bias, layer.bias);
 		assert_eq!(cache.pre_activation, vec![-1.5, -0.75, 0.0, 0.75, 1.5]);
+	}
+
+	#[test]
+	fn test_backward() {
+		let mut layer = Layer {
+			weight: Matrix {
+				row: 4,
+				col: 5,
+				data: vec![
+					-1.0, -0.5, 0.0, 0.5, 1.0, //
+					-1.0, -0.5, 0.0, 0.5, 1.0, //
+					-1.0, -0.5, 0.0, 0.5, 1.0, //
+					-1.0, -0.5, 0.0, 0.5, 1.0,
+				],
+			},
+			bias: vec![-1.0, -0.5, 0.0, 0.5, 1.0],
+		};
+
+		let input = vec![-1.0, 0.0, 0.5, 1.0];
+
+		let (output, cache) = layer.forward_cache(input.clone(), ReLU);
+
+		let target = vec![-1.0, 0.5, 0.0, 1.0];
+		let learning_rate = 0.1;
+
+		let d_output = output
+			.iter()
+			.zip(target.iter())
+			.map(|(o, t)| 2.0 * (o - t))
+			.collect::<Vec<Float>>();
+
+		layer.backward(cache, d_output, learning_rate);
+
+		assert_eq!(
+			layer.weight.data,
+			vec![
+				-1.0, -0.5, 0.0, 0.45, 1.0, //
+				-1.0, -0.5, 0.0, 0.5, 1.0, //
+				-1.0, -0.5, 0.0, 0.525, 1.0, //
+				-1.0, -0.5, 0.0, 0.55, 1.0,
+			]
+		);
+
+		assert_eq!(layer.bias, vec![-1.0, -0.5, 0.0, 0.55, 1.0]);
 	}
 }
