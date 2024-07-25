@@ -9,6 +9,6 @@ authors = [
 description = "neural network implementation"
 
 [dependencies]
-polars = { version = "0.41.0", default-features = false, features = [
+polars = { version = "0.41", default-features = false, features = [
 	"performant",
 ] }

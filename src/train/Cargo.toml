@@ -11,6 +11,6 @@ description = "train model based on logistic regression (one vs all)"
 [dependencies]
 load = { path = "../load" }
 clap = { version = "4", features = ["derive"] }
-polars = { version = "0.41.0", default-features = false, features = [
+polars = { version = "0.41", default-features = false, features = [
 	"performant",
 ] }
