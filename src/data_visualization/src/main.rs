@@ -6,8 +6,10 @@ use std::{error::Error, process};
 use polars::frame::DataFrame;
 use polars::prelude::*;
 
+mod hist_test;
 mod parse_cols;
-mod plot;
+mod pp_test;
+mod scatter;
 
 fn main() -> Result<(), Box<dyn Error>> {
 	let filename = "./ressources/dataset_train.csv";
@@ -16,18 +18,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 	};
 
 	println!("test: {:}", data);
-	println!(
-		"test: {:}",
-		data.clone()
-			.lazy()
-			.select([col("Hogwarts House"), col("Flying")])
-			.collect()?
-	);
+	// println!(
+	// 	"test: {:}",
+	// 	data.clone()
+	// 		.lazy()
+	// 		.select([col("Hogwarts House"), col("Flying")])
+	// 		.collect()?
+	// );
 
-	plot::simple_scatter_plot(data)?;
-
-	plot::normalized_histogram();
-	plot::test_scatter_plot();
+	scatter::simple_scatter_plot(data)?;
+	// hist_test::histogram_plot(data.clone());
+	// pp_test::pair_plot(data);
 
 	Ok(())
 }
