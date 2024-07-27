@@ -1,9 +1,9 @@
 mod group;
 
-use std::{collections::HashMap, path::PathBuf};
+use std::path::PathBuf;
 
 use clap::Parser;
-use polars::{error::PolarsResult, frame::DataFrame};
+use polars::error::PolarsResult;
 
 #[derive(Parser)]
 #[command(about)]
