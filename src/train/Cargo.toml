@@ -9,9 +9,12 @@ authors = [
 description = "train model based on logistic regression (one vs all)"
 
 [dependencies]
+float = { path = "../float" }
 load = { path = "../load" }
+model = { path = "../model" }
 hypothesis = { path = "../hypothesis" }
 clap = { version = "4", features = ["derive"] }
 polars = { version = "0.41", default-features = false, features = [
 	"performant",
 ] }
+indicatif = "0.17"

@@ -1,4 +1,4 @@
-type Float = f32;
+use float::Float;
 
 fn sigmoid(x: Float) -> Float {
 	1.0 / (1.0 + (-x).exp())

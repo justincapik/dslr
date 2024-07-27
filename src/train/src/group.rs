@@ -1,10 +1,13 @@
 use std::collections::HashMap;
 
+use float::Float;
 use polars::prelude::*;
+
+pub type GroupedRow = HashMap<String, Vec<Vec<Float>>>;
 
 const UNKNOWN_LABEL: &str = "UNKNOWN";
 
-pub fn row_by_label(df: DataFrame) -> HashMap<String, Vec<Vec<f32>>> {
+pub fn row_by_label(df: DataFrame) -> HashMap<String, Vec<Vec<Float>>> {
 	let mut grouped_row = HashMap::new();
 
 	let capacity = get_capacity(&df);
@@ -31,7 +34,7 @@ pub fn row_by_label(df: DataFrame) -> HashMap<String, Vec<Vec<f32>>> {
 			if cell.dtype().is_float() {
 				row_data.push(
 					cell.cast(&DataType::Float32)
-						.try_extract::<f32>()
+						.try_extract::<Float>()
 						.unwrap_or(0.0),
 				);
 			}

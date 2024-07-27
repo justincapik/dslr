@@ -1,5 +1,12 @@
 [workspace]
-members = ["src/load", "src/describe", "src/hypothesis", "src/train"]
+members = [
+	"src/float",
+	"src/load",
+	"src/describe",
+	"src/model",
+	"src/hypothesis",
+	"src/train",
+]
 resolver = "2"
 
 [profile.dev]
