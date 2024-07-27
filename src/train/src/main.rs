@@ -1,7 +1,9 @@
-use std::path::PathBuf;
+mod group;
+
+use std::{collections::HashMap, path::PathBuf};
 
 use clap::Parser;
-use polars::error::PolarsResult;
+use polars::{error::PolarsResult, frame::DataFrame};
 
 #[derive(Parser)]
 #[command(about)]
@@ -21,6 +23,13 @@ fn main() -> PolarsResult<()> {
 	dbg!(&args.path, &args.output);
 
 	let df = load::load(&args.path)?;
+
+	let grouped_row = group::row_by_label(df);
+
+	dbg!(grouped_row
+		.iter()
+		.map(|(label, group)| (label, group.len()))
+		.collect::<Vec<_>>());
 
 	Ok(())
 }
