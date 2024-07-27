@@ -4,8 +4,13 @@ fn sigmoid(x: Float) -> Float {
 	1.0 / (1.0 + (-x).exp())
 }
 
-pub fn hypothesis(x: &[Float], y: &[Float]) -> Float {
-	sigmoid(x.iter().zip(y.iter()).map(|(x, y)| x * y).sum())
+pub fn hypothesis(x: &[Float], thetas: &[Float]) -> Float {
+	sigmoid(
+		x.iter()
+			.zip(thetas.iter())
+			.map(|(x, theta)| x * theta)
+			.sum(),
+	)
 }
 
 #[cfg(test)]
