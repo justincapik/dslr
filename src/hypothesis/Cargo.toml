@@ -1,0 +1,11 @@
+[package]
+name = "hypothesis"
+version = "0.1.0"
+edition = "2021"
+authors = [
+	"jucapik <jucapik@student.42.fr>",
+	"adelille <adelille@student.42.fr>",
+]
+description = "Estimate y based on array x and array theta"
+
+[dependencies]

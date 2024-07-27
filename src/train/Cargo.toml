@@ -10,6 +10,7 @@ description = "train model based on logistic regression (one vs all)"
 
 [dependencies]
 load = { path = "../load" }
+hypothesis = { path = "../hypothesis" }
 clap = { version = "4", features = ["derive"] }
 polars = { version = "0.41", default-features = false, features = [
 	"performant",
