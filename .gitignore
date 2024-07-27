@@ -1,4 +1,7 @@
 ### project specific ###
+# graphs output
+*.png
+
 # trained model
 /model.csv
 
