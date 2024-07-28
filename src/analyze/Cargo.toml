@@ -1,19 +1,15 @@
 [package]
-name = "describe"
+name = "analyze"
 version = "0.1.0"
 edition = "2021"
 authors = [
 	"jucapik <jucapik@student.42.fr>",
 	"adelille <adelille@student.42.fr>",
 ]
-description = "describe data from a csv (mean, std, min, max, etc.)"
+description = "analyze a polars Series"
 
 [dependencies]
 float = { path = "../float" }
-load = { path = "../load" }
-analyze = { path = "../analyze" }
-clap = { version = "4", features = ["derive"] }
 polars = { version = "0.41", default-features = false, features = [
 	"performant",
 ] }
-tabled = { git = "https://github.com/zhiburt/tabled.git" }

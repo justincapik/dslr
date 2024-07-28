@@ -3,20 +3,40 @@ use std::collections::HashMap;
 use float::Float;
 use polars::prelude::*;
 
+use crate::Args;
+
 pub type GroupedDatasets = HashMap<String, Datasets>;
 
 #[derive(Debug, PartialEq)]
 pub struct Datasets {
 	pub training: Vec<Features>,
 	pub testing: Vec<Features>,
+	pub analysis: AllFeatureAnalysis,
 }
 
 pub type Features = Vec<Float>;
 
+pub type AllFeatureAnalysis = Vec<FeatureAnalysis>;
+
+#[derive(Debug, PartialEq)]
+pub struct FeatureAnalysis {
+	pub mean: Float,
+	pub min: Float,
+	pub max: Float,
+}
+
 const UNKNOWN_LABEL: &str = "UNKNOWN";
 const MOD_SPLIT_FACTOR: usize = 3;
 
-pub fn prepare(df: DataFrame) -> GroupedDatasets {
+pub fn prepare(arg: &Args, df: DataFrame) -> GroupedDatasets {
+	let mut grouped_datasets = fill_grouped_datasets(&df);
+
+	normalize(&grouped_datasets);
+
+	grouped_datasets
+}
+
+fn fill_grouped_datasets(df: &DataFrame) -> GroupedDatasets {
 	let mut grouped_datasets = HashMap::new();
 
 	let capacity = get_capacity(&df);
@@ -79,6 +99,8 @@ fn get_capacity(df: &DataFrame) -> usize {
 
 	capacity
 }
+
+fn normalize
 
 #[cfg(test)]
 mod tests {

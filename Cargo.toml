@@ -2,6 +2,7 @@
 members = [
 	"src/float",
 	"src/load",
+	"src/analyze",
 	"src/describe",
 	"src/model",
 	"src/hypothesis",
