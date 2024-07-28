@@ -14,11 +14,10 @@ pub struct Datasets {
 pub type Features = Vec<Float>;
 
 const UNKNOWN_LABEL: &str = "UNKNOWN";
+const MOD_SPLIT_FACTOR: usize = 3;
 
 pub fn prepare(df: DataFrame) -> GroupedDatasets {
 	let mut grouped_datasets = HashMap::new();
-
-	/*
 
 	let capacity = get_capacity(&df);
 
@@ -52,11 +51,19 @@ pub fn prepare(df: DataFrame) -> GroupedDatasets {
 
 		let label = label.unwrap_or(String::from(UNKNOWN_LABEL));
 
-		let entry = grouped_row.entry(label).or_insert_with(Vec::new);
+		let datasets = grouped_datasets.entry(label).or_insert_with(|| Datasets {
+			training: Vec::new(),
+			testing: Vec::new(),
+		});
 
-		entry.push(row_data);
+		if datasets.training.is_empty() {
+			datasets.training.push(row_data);
+		} else if datasets.testing.is_empty() || row % MOD_SPLIT_FACTOR == 0 {
+			datasets.testing.push(row_data);
+		} else {
+			datasets.training.push(row_data);
+		}
 	}
-	*/
 
 	grouped_datasets
 }
