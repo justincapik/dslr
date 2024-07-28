@@ -85,7 +85,7 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn test_row_by_label_basic() {
+	fn test_prepare_basic() {
 		let df = DataFrame::new(vec![
 			Series::new("label", &["a", "b", "a", "c"]),
 			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
@@ -120,32 +120,29 @@ mod tests {
 		);
 	}
 
-	/*
 	#[test]
-	fn test_row_by_label_missing_label() {
+	fn test_prepare_missing_label() {
 		let df = DataFrame::new(vec![
 			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
 			Series::new("two", &[5.0, 6.0, 7.0, 8.0]),
 		])
 		.unwrap();
 
-		let grouped_row = row_by_label(df);
+		let grouped_datasets = prepare(df);
 
-		assert_eq!(grouped_row.len(), 1);
+		assert_eq!(grouped_datasets.len(), 1);
 
 		assert_eq!(
-			grouped_row.get(UNKNOWN_LABEL).unwrap(),
-			&vec![
-				vec![1.0, 5.0],
-				vec![2.0, 6.0],
-				vec![3.0, 7.0],
-				vec![4.0, 8.0]
-			]
+			grouped_datasets.get(UNKNOWN_LABEL).unwrap(),
+			&Datasets {
+				training: vec![vec![1.0, 5.0], vec![3.0, 7.0]],
+				testing: vec![vec![2.0, 6.0], vec![4.0, 8.0]]
+			}
 		);
 	}
 
 	#[test]
-	fn test_row_by_label_label_in_middle() {
+	fn test_prepare_label_in_middle() {
 		let df = DataFrame::new(vec![
 			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
 			Series::new("label", &["a", "a", "b", "c"]),
@@ -153,20 +150,35 @@ mod tests {
 		])
 		.unwrap();
 
-		let grouped_row = row_by_label(df);
+		let grouped_datasets = prepare(df);
 
-		assert_eq!(grouped_row.len(), 3);
+		assert_eq!(grouped_datasets.len(), 3);
 
 		assert_eq!(
-			grouped_row.get("a").unwrap(),
-			&vec![vec![1.0, 5.0], vec![2.0, 6.0]]
+			grouped_datasets.get("a").unwrap(),
+			&Datasets {
+				training: vec![vec![1.0, 5.0]],
+				testing: vec![vec![2.0, 6.0]]
+			}
 		);
-		assert_eq!(grouped_row.get("b").unwrap(), &vec![vec![3.0, 7.0]]);
-		assert_eq!(grouped_row.get("c").unwrap(), &vec![vec![4.0, 8.0]]);
+		assert_eq!(
+			grouped_datasets.get("b").unwrap(),
+			&Datasets {
+				training: vec![vec![3.0, 7.0]],
+				testing: vec![]
+			}
+		);
+		assert_eq!(
+			grouped_datasets.get("c").unwrap(),
+			&Datasets {
+				training: vec![vec![4.0, 8.0]],
+				testing: vec![]
+			}
+		);
 	}
 
 	#[test]
-	fn test_row_by_label_with_integer() {
+	fn test_prepare_with_integer() {
 		let df = DataFrame::new(vec![
 			Series::new("label", &["a", "a", "b", "c"]),
 			Series::new("one", &[1, 2, 3, 4]),
@@ -174,13 +186,30 @@ mod tests {
 		])
 		.unwrap();
 
-		let grouped_row = row_by_label(df);
+		let grouped_datasets = prepare(df);
 
-		assert_eq!(grouped_row.len(), 3);
+		assert_eq!(grouped_datasets.len(), 3);
 
-		assert_eq!(grouped_row.get("a").unwrap(), &vec![vec![5.0], vec![6.0]]);
-		assert_eq!(grouped_row.get("b").unwrap(), &vec![vec![7.0]]);
-		assert_eq!(grouped_row.get("c").unwrap(), &vec![vec![8.0]]);
+		assert_eq!(
+			grouped_datasets.get("a").unwrap(),
+			&Datasets {
+				training: vec![vec![5.0]],
+				testing: vec![vec![6.0]],
+			}
+		);
+		assert_eq!(
+			grouped_datasets.get("b").unwrap(),
+			&Datasets {
+				training: vec![vec![7.0]],
+				testing: vec![],
+			}
+		);
+		assert_eq!(
+			grouped_datasets.get("c").unwrap(),
+			&Datasets {
+				training: vec![vec![8.0]],
+				testing: vec![],
+			}
+		);
 	}
-	*/
 }
