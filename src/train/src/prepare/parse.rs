@@ -1,42 +1,14 @@
 use std::collections::HashMap;
 
 use float::Float;
-use polars::prelude::*;
+use polars::{frame::DataFrame, prelude::DataType};
 
-use crate::Args;
-
-pub type GroupedDatasets = HashMap<String, Datasets>;
-
-#[derive(Debug, PartialEq)]
-pub struct Datasets {
-	pub training: Vec<Features>,
-	pub testing: Vec<Features>,
-	pub analysis: AllFeatureAnalysis,
-}
-
-pub type Features = Vec<Float>;
-
-pub type AllFeatureAnalysis = Vec<FeatureAnalysis>;
-
-#[derive(Debug, PartialEq)]
-pub struct FeatureAnalysis {
-	pub mean: Float,
-	pub min: Float,
-	pub max: Float,
-}
+use super::{Datasets, GroupedDatasets};
 
 const UNKNOWN_LABEL: &str = "UNKNOWN";
 const MOD_SPLIT_FACTOR: usize = 3;
 
-pub fn prepare(args: &Args, df: DataFrame) -> GroupedDatasets {
-	let mut grouped_datasets = fill_grouped_datasets(&df);
-
-	normalize(args, &mut grouped_datasets);
-
-	grouped_datasets
-}
-
-fn fill_grouped_datasets(df: &DataFrame) -> GroupedDatasets {
+pub fn datasets(df: &DataFrame) -> GroupedDatasets {
 	let mut grouped_datasets = HashMap::new();
 
 	let capacity = get_capacity(&df);
@@ -100,15 +72,13 @@ fn get_capacity(df: &DataFrame) -> usize {
 	capacity
 }
 
-fn normalize(args: &Args, grouped_datasets: &mut GroupedDatasets) {
-	
-
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use polars::prelude::*;
 
 	#[test]
-	fn test_prepare_basic() {
+	fn test_parse_basic() {
 		let df = DataFrame::new(vec![
 			Series::new("label", &["a", "b", "a", "c"]),
 			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
@@ -116,7 +86,7 @@ mod tests {
 		])
 		.unwrap();
 
-		let grouped_datasets = prepare(df);
+		let grouped_datasets = datasets(&df);
 
 		assert_eq!(grouped_datasets.len(), 3);
 
@@ -144,14 +114,14 @@ mod tests {
 	}
 
 	#[test]
-	fn test_prepare_missing_label() {
+	fn test_parse_missing_label() {
 		let df = DataFrame::new(vec![
 			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
 			Series::new("two", &[5.0, 6.0, 7.0, 8.0]),
 		])
 		.unwrap();
 
-		let grouped_datasets = prepare(df);
+		let grouped_datasets = datasets(&df);
 
 		assert_eq!(grouped_datasets.len(), 1);
 
@@ -165,7 +135,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_prepare_label_in_middle() {
+	fn test_parse_label_in_middle() {
 		let df = DataFrame::new(vec![
 			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
 			Series::new("label", &["a", "a", "b", "c"]),
@@ -173,7 +143,7 @@ mod tests {
 		])
 		.unwrap();
 
-		let grouped_datasets = prepare(df);
+		let grouped_datasets = datasets(&df);
 
 		assert_eq!(grouped_datasets.len(), 3);
 
@@ -201,7 +171,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_prepare_with_integer() {
+	fn test_parse_with_integer() {
 		let df = DataFrame::new(vec![
 			Series::new("label", &["a", "a", "b", "c"]),
 			Series::new("one", &[1, 2, 3, 4]),
@@ -209,7 +179,7 @@ mod tests {
 		])
 		.unwrap();
 
-		let grouped_datasets = prepare(df);
+		let grouped_datasets = datasets(&df);
 
 		assert_eq!(grouped_datasets.len(), 3);
 

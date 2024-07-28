@@ -12,6 +12,7 @@ description = "train model based on logistic regression (one vs all)"
 float = { path = "../float" }
 load = { path = "../load" }
 model = { path = "../model" }
+analyze = { path = "../analyze" }
 hypothesis = { path = "../hypothesis" }
 clap = { version = "4", features = ["derive"] }
 polars = { version = "0.41", default-features = false, features = [

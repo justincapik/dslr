@@ -112,8 +112,8 @@ mod tests {
 
 			min: series.min().unwrap(),
 			max: series.max().unwrap(),
-			mean: series.mean(),
-			median: series.median(),
+			mean: series.mean().map(|x| x as Float),
+			median: series.median().map(|x| x as Float),
 			q1: match series.quantile_reduce(0.25, QuantileInterpolOptions::Lower) {
 				Ok(x) => x.value().try_extract::<Float>().ok(),
 				_ => None,
@@ -122,7 +122,7 @@ mod tests {
 				Ok(x) => x.value().try_extract::<Float>().ok(),
 				_ => None,
 			},
-			std: series.std(0),
+			std: series.std(0).map(|x| x as Float),
 			sum: match series.sum_reduce() {
 				Ok(x) => x.value().try_extract::<Float>().ok().and_then(|x| {
 					if x == 0.0 {
@@ -154,7 +154,7 @@ mod tests {
 			median: Some(3.0),
 			q1: Some(2.0),
 			q3: Some(4.0),
-			std: Some(std::Float::consts::SQRT_2),
+			std: Some(std::f32::consts::SQRT_2),
 			sum: Some(15.0),
 		};
 
@@ -183,7 +183,7 @@ mod tests {
 			median: Some(3.0),
 			q1: Some(2.0),
 			q3: Some(4.0),
-			std: Some(std::Float::consts::SQRT_2),
+			std: Some(std::f32::consts::SQRT_2),
 			sum: Some(15.0),
 		};
 
@@ -270,7 +270,7 @@ mod tests {
 			median: Some(3.0),
 			q1: Some(2.0),
 			q3: Some(4.0),
-			std: Some(std::Float::consts::SQRT_2),
+			std: Some(std::f32::consts::SQRT_2),
 			sum: Some(15.0),
 		};
 
@@ -284,7 +284,7 @@ mod tests {
 	#[test]
 	fn test_analysis_empty() {
 		let name = String::from("a");
-		let dtype = DataType::Float64;
+		let dtype = DataType::Float32;
 		let empty: [Float; 0] = [];
 		let s = Series::new(&name, &empty);
 

@@ -1,5 +1,5 @@
-// mod learn;
-// mod prepare;
+mod learn;
+mod prepare;
 
 use std::path::PathBuf;
 
@@ -8,7 +8,7 @@ use polars::error::PolarsResult;
 
 use float::Float;
 
-#[derive(ValueEnum, Default, Clone, PartialEq)]
+#[derive(ValueEnum, Default, Clone, Copy, PartialEq)]
 #[cfg(debug_assertions)]
 #[derive(Debug)]
 pub enum Normalization {
@@ -50,12 +50,12 @@ fn main() -> PolarsResult<()> {
 
 	let df = load::load(&args.path)?;
 
-	// let grouped_datasets = prepare::prepare(args, df);
+	let grouped_datasets = prepare::prepare(&args, df);
 
-	// dbg!(grouped_datasets
-	// 	.iter()
-	// 	.map(|(label, dataset)| (label, dataset.training.len(), dataset.testing.len()))
-	// 	.collect::<Vec<_>>());
+	dbg!(grouped_datasets
+		.iter()
+		.map(|(label, dataset)| (label, dataset.training.len(), dataset.testing.len()))
+		.collect::<Vec<_>>());
 
 	// learn::learn(&args, grouped_datasets);
 
