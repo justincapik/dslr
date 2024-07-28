@@ -139,8 +139,17 @@ pub fn pair_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 				.columns(useful_subjects.len())
 				.pattern(GridPattern::Independent),
 		)
-		.legend(Legend::new().title("Subjects").item_width(1));
+		.legend(
+			Legend::new()
+				.title("Houses")
+				.item_sizing(ItemSizing::Constant)
+				.border_color(NamedColor::Black)
+				.border_width(1)
+				.background_color(NamedColor::GhostWhite),
+		)
+		.title("Hogwarts Houses pair plot analysis, with relevant classes");
 
+	let mut legend_check = 0;
 	let mut i = 1;
 	for main_name in useful_subjects {
 		println!("Adding {main_name}");
@@ -157,14 +166,17 @@ pub fn pair_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 					match make_histogram_trace(main_name, i, mseries, house_name) {
 						Err(e) => println!("column error: {}", e),
 						Ok(mut trace) => {
-							if (!check) {
-								trace = trace.name(main_name);
+							if (legend_check < 4) {
+								trace = trace.name(house_name);
+								legend_check += 1;
+							} else {
+								trace = trace.show_legend(false);
 							}
 							check = true;
 							plot.add_trace(trace);
 							layout.add_annotation(
 								Annotation::new()
-									.y(1.15)
+									.y(1.1)
 									.x(0.5)
 									.y_ref(format!("y{} domain", i))
 									.x_ref(format!("x{} domain", i))
@@ -180,21 +192,24 @@ pub fn pair_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 					match make_scatter_trace(main_name, i, mseries, sseries, house_name) {
 						Err(e) => println!("column error: {}", e),
 						Ok(mut trace) => {
-							if (!check) {
-								trace = trace.name(main_name);
+							if (legend_check < 4) {
+								trace = trace.name(house_name);
+								legend_check += 1;
+							} else {
+								trace = trace.show_legend(false);
 							}
 							check = true;
 							plot.add_trace(trace);
 							layout.add_annotation(
 								Annotation::new()
-									.y(1.15)
+									.y(1.1)
 									.x(0.5)
 									.y_ref(format!("y{} domain", i))
 									.x_ref(format!("x{} domain", i))
 									.y_anchor(Anchor::Top)
 									.x_anchor(Anchor::Center)
 									.show_arrow(false)
-									.text(format!("{} x {}", main_name, sec_name)),
+									.text(format!("{} vs {}", main_name, sec_name)),
 							);
 						}
 					};

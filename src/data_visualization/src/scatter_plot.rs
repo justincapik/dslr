@@ -5,13 +5,13 @@ use itertools_num::linspace;
 use plotly::common::{
 	self, ColorScale, ColorScalePalette, DashType, Fill, Font, Line, LineShape, Marker, Mode, Title,
 };
-use plotly::layout::{self, Axis, BarMode, Layout, Legend, TicksDirection};
+use plotly::layout::{self, Annotation, Axis, BarMode, Layout, Legend, TicksDirection};
 use plotly::Scatter;
 use plotly::{ImageFormat, Plot};
 
 use plotly::box_plot::{BoxMean, BoxPoints};
 use plotly::color::{NamedColor, Rgb, Rgba};
-use plotly::common::{ErrorData, ErrorType, Orientation};
+use plotly::common::{Anchor, ErrorData, ErrorType, Orientation};
 use plotly::histogram::{Bins, Cumulative, HistFunc, HistNorm};
 use plotly::layout::{BoxMode, Margin, TraceOrder};
 use plotly::{Bar, BoxPlot, Histogram};
@@ -33,7 +33,7 @@ fn make_trace(
 	i: usize,
 	data: &Series,
 	house_name: &str,
-) -> Result<Box<Histogram<f64>>, Box<dyn Error>> {
+) -> Result<Box<Scatter<f64, f64>>, Box<dyn Error>> {
 	//
 	let mut col: Vec<f64> = data
 		.f64()?
@@ -53,8 +53,10 @@ fn make_trace(
 	let max = col.len() as f64;
 	let n = (max - min) as usize;
 	// col.sort_by(|a, b| a.partial_cmp(b).unwrap());
-	//let t = sample_uniform_distribution(n, min, max);
+	let t: Vec<f64> = col.iter().copied().rev().collect();
+	// let t = (&t[0..t.len() / 2]).to_vec();
 	let y = col;
+	// let y = (&y[0..y.len() / 2]).to_vec();
 
 	let color = match house_name {
 		"Gryffindor" => NamedColor::Red,
@@ -64,14 +66,34 @@ fn make_trace(
 		_ => NamedColor::Black,
 	};
 
-	Ok(Histogram::new(y)
-		.marker(Marker::new().color(color))
+	Ok(Scatter::new(t, y)
+		.mode(Mode::Markers)
+		.marker(Marker::new().color(color).size(3))
 		.x_axis(format!("x{}", i))
 		.y_axis(format!("y{}", i)))
 }
 
-pub fn histogram_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
+pub fn simple_scatter_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 	let mut plot = Plot::new();
+
+	let mut layout = Layout::new()
+		.grid(
+			LayoutGrid::new()
+				.rows(4)
+				.columns(4)
+				.pattern(GridPattern::Independent),
+		)
+		.legend(
+			Legend::new()
+				.title("Houses")
+				.item_sizing(ItemSizing::Constant)
+				.border_color(NamedColor::Black)
+				.border_width(1)
+				.background_color(NamedColor::GhostWhite),
+		)
+		.title("Hogwarts Houses scatter plots, for each class");
+
+	let mut legend_check = 0;
 
 	let mut i = 1;
 	for name in data.get_column_names() {
@@ -87,11 +109,25 @@ pub fn histogram_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 			match make_trace(name, i, series, house_name) {
 				Err(e) => println!("column error: {}", e),
 				Ok(mut trace) => {
-					if (!check) {
-						trace = trace.name(name);
+					if (legend_check < 4) {
+						trace = trace.name(house_name);
+						legend_check += 1;
+					} else {
+						trace = trace.show_legend(false);
 					}
 					check = true;
 					plot.add_trace(trace);
+					layout.add_annotation(
+						Annotation::new()
+							.y(1.1)
+							.x(0.5)
+							.y_ref(format!("y{} domain", i))
+							.x_ref(format!("x{} domain", i))
+							.y_anchor(Anchor::Top)
+							.x_anchor(Anchor::Center)
+							.show_arrow(false)
+							.text(format!("{}", name)),
+					);
 					println!("{name} added !");
 				}
 			};
@@ -101,21 +137,9 @@ pub fn histogram_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 		}
 	}
 
-	let layout = Layout::new()
-		.grid(
-			LayoutGrid::new()
-				.rows(4)
-				.columns(4)
-				.pattern(GridPattern::Independent),
-		)
-		.legend(
-			Legend::new()
-				.title("Subjects")
-				.item_sizing(ItemSizing::Constant.clone()),
-		);
 	plot.set_layout(layout);
 
-	plot.write_image("histogram.png", ImageFormat::PNG, 1200, 1200, 1.0);
+	plot.write_image("scatter.png", ImageFormat::PNG, 1200, 1200, 1.0);
 
 	Ok(())
 }

@@ -33,7 +33,7 @@ fn make_trace(
 	i: usize,
 	data: &Series,
 	house_name: &str,
-) -> Result<Box<Scatter<f64, f64>>, Box<dyn Error>> {
+) -> Result<Box<Histogram<f64>>, Box<dyn Error>> {
 	//
 	let mut col: Vec<f64> = data
 		.f64()?
@@ -53,10 +53,8 @@ fn make_trace(
 	let max = col.len() as f64;
 	let n = (max - min) as usize;
 	// col.sort_by(|a, b| a.partial_cmp(b).unwrap());
-	let t: Vec<f64> = col.iter().copied().rev().collect();
-	// let t = (&t[0..t.len() / 2]).to_vec();
+	//let t = sample_uniform_distribution(n, min, max);
 	let y = col;
-	// let y = (&y[0..y.len() / 2]).to_vec();
 
 	let color = match house_name {
 		"Gryffindor" => NamedColor::Red,
@@ -66,14 +64,13 @@ fn make_trace(
 		_ => NamedColor::Black,
 	};
 
-	Ok(Scatter::new(t, y)
-		.mode(Mode::Markers)
-		.marker(Marker::new().color(color).size(3))
+	Ok(Histogram::new(y)
+		.marker(Marker::new().color(color))
 		.x_axis(format!("x{}", i))
 		.y_axis(format!("y{}", i)))
 }
 
-pub fn simple_scatter_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
+pub fn histogram_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 	let mut plot = Plot::new();
 
 	let mut layout = Layout::new()
@@ -85,10 +82,15 @@ pub fn simple_scatter_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 		)
 		.legend(
 			Legend::new()
-				.title("Subjects")
-				.item_sizing(ItemSizing::Constant.clone()),
-		);
+				.title("Houses")
+				.item_sizing(ItemSizing::Constant)
+				.border_color(NamedColor::Black)
+				.border_width(1)
+				.background_color(NamedColor::GhostWhite),
+		)
+		.title("Hogwarts Houses histograms, for each class");
 
+	let mut legend_check = 0;
 	let mut i = 1;
 	for name in data.get_column_names() {
 		println!("Adding {name}");
@@ -103,8 +105,11 @@ pub fn simple_scatter_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 			match make_trace(name, i, series, house_name) {
 				Err(e) => println!("column error: {}", e),
 				Ok(mut trace) => {
-					if (!check) {
-						trace = trace.name(name);
+					if (legend_check < 4) {
+						trace = trace.name(house_name);
+						legend_check += 1;
+					} else {
+						trace = trace.show_legend(false);
 					}
 					check = true;
 					plot.add_trace(trace);
@@ -127,9 +132,10 @@ pub fn simple_scatter_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 			i += 1;
 		}
 	}
+
 	plot.set_layout(layout);
 
-	plot.write_image("scatter.png", ImageFormat::PNG, 1200, 1200, 1.0);
+	plot.write_image("histogram.png", ImageFormat::PNG, 1200, 1200, 1.0);
 
 	Ok(())
 }

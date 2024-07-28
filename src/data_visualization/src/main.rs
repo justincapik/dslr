@@ -6,10 +6,10 @@ use std::{error::Error, process};
 use polars::frame::DataFrame;
 use polars::prelude::*;
 
-mod hist_test;
+mod histogram;
+mod pair_plot;
 mod parse_cols;
-mod pp_test;
-mod scatter;
+mod scatter_plot;
 
 fn main() -> Result<(), Box<dyn Error>> {
 	let filename = "./ressources/dataset_train.csv";
@@ -17,18 +17,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 		return Err("Invalid file".into());
 	};
 
-	println!("test: {:}", data);
-	// println!(
-	// 	"test: {:}",
-	// 	data.clone()
-	// 		.lazy()
-	// 		.select([col("Hogwarts House"), col("Flying")])
-	// 		.collect()?
-	// );
+	let data = data;
 
-	scatter::simple_scatter_plot(data)?;
-	// hist_test::histogram_plot(data.clone());
-	// pp_test::pair_plot(data);
+	println!("test: {:}", data);
+
+	// scatter_plot::simple_scatter_plot(data)?;
+	// histogram::histogram_plot(data.clone());
+	pair_plot::pair_plot(data);
 
 	Ok(())
 }
