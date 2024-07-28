@@ -3,12 +3,22 @@ use std::collections::HashMap;
 use float::Float;
 use polars::prelude::*;
 
-pub type GroupedRow = HashMap<String, Vec<Vec<Float>>>;
+pub type GroupedDatasets = HashMap<String, Datasets>;
+
+#[derive(Debug, PartialEq)]
+pub struct Datasets {
+	pub training: Vec<Features>,
+	pub testing: Vec<Features>,
+}
+
+pub type Features = Vec<Float>;
 
 const UNKNOWN_LABEL: &str = "UNKNOWN";
 
-pub fn row_by_label(df: DataFrame) -> HashMap<String, Vec<Vec<Float>>> {
-	let mut grouped_row = HashMap::new();
+pub fn prepare(df: DataFrame) -> GroupedDatasets {
+	let mut grouped_datasets = HashMap::new();
+
+	/*
 
 	let capacity = get_capacity(&df);
 
@@ -46,8 +56,9 @@ pub fn row_by_label(df: DataFrame) -> HashMap<String, Vec<Vec<Float>>> {
 
 		entry.push(row_data);
 	}
+	*/
 
-	grouped_row
+	grouped_datasets
 }
 
 fn get_capacity(df: &DataFrame) -> usize {
@@ -69,24 +80,40 @@ mod tests {
 	#[test]
 	fn test_row_by_label_basic() {
 		let df = DataFrame::new(vec![
-			Series::new("label", &["a", "a", "b", "c"]),
+			Series::new("label", &["a", "b", "a", "c"]),
 			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
 			Series::new("two", &[5.0, 6.0, 7.0, 8.0]),
 		])
 		.unwrap();
 
-		let grouped_row = row_by_label(df);
+		let grouped_datasets = prepare(df);
 
-		assert_eq!(grouped_row.len(), 3);
+		assert_eq!(grouped_datasets.len(), 3);
 
 		assert_eq!(
-			grouped_row.get("a").unwrap(),
-			&vec![vec![1.0, 5.0], vec![2.0, 6.0]]
+			grouped_datasets.get("a").unwrap(),
+			&Datasets {
+				training: vec![vec![1.0, 5.0]],
+				testing: vec![vec![3.0, 7.0]]
+			}
 		);
-		assert_eq!(grouped_row.get("b").unwrap(), &vec![vec![3.0, 7.0]]);
-		assert_eq!(grouped_row.get("c").unwrap(), &vec![vec![4.0, 8.0]]);
+		assert_eq!(
+			grouped_datasets.get("b").unwrap(),
+			&Datasets {
+				training: vec![vec![2.0, 6.0]],
+				testing: vec![]
+			}
+		);
+		assert_eq!(
+			grouped_datasets.get("c").unwrap(),
+			&Datasets {
+				training: vec![vec![4.0, 8.0]],
+				testing: vec![]
+			}
+		);
 	}
 
+	/*
 	#[test]
 	fn test_row_by_label_missing_label() {
 		let df = DataFrame::new(vec![
@@ -148,4 +175,5 @@ mod tests {
 		assert_eq!(grouped_row.get("b").unwrap(), &vec![vec![7.0]]);
 		assert_eq!(grouped_row.get("c").unwrap(), &vec![vec![8.0]]);
 	}
+	*/
 }

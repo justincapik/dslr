@@ -1,5 +1,5 @@
-mod group;
 mod learn;
+mod prepare;
 
 use std::path::PathBuf;
 
@@ -7,6 +7,7 @@ use clap::Parser;
 use polars::error::PolarsResult;
 
 use float::Float;
+use prepare::GroupedDatasets;
 
 #[derive(Parser)]
 #[command(about)]
@@ -35,14 +36,14 @@ fn main() -> PolarsResult<()> {
 
 	let df = load::load(&args.path)?;
 
-	let grouped_row = group::row_by_label(df);
+	let grouped_datasets = prepare::prepare(df);
 
-	dbg!(grouped_row
+	dbg!(grouped_datasets
 		.iter()
-		.map(|(label, group)| (label, group.len()))
+		.map(|(label, dataset)| (label, dataset.training.len(), dataset.testing.len()))
 		.collect::<Vec<_>>());
 
-	learn::learn(&args, grouped_row);
+	// learn::learn(&args, grouped_datasets);
 
 	Ok(())
 }

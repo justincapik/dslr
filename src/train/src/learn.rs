@@ -3,9 +3,10 @@ use hypothesis::hypothesis;
 use indicatif::ProgressIterator;
 use model::Model;
 
-use crate::{group::GroupedRow, Args};
+use crate::{prepare::GroupedDatasets, Args};
 
-pub fn learn(arg: &Args, grouped_row: GroupedRow) {
+/*
+pub fn learn(arg: &Args, grouped_datasets: GroupedDatasets) {
 	let mut model = Model::default();
 
 	for (label, rows) in grouped_row.iter() {
@@ -26,9 +27,10 @@ pub fn learn(arg: &Args, grouped_row: GroupedRow) {
 fn guess(thetas: &[Float], rows: &Vec<Vec<Float>>, learning_rate: Float) -> Vec<Float> {
 	let mut new_thetas = thetas.to_vec();
 
-	for (new_theta, ) in  {
-		new_thetas[i] -= learning_rate * hypothesis(row, thetas);
+	for (new_theta, row) in new_thetas.iter_mut().zip(rows.iter()) {
+		*new_theta -= learning_rate * hypothesis(row, thetas);
 	}
 
 	new_thetas
 }
+	*/
