@@ -28,10 +28,10 @@ pub struct FeatureAnalysis {
 const UNKNOWN_LABEL: &str = "UNKNOWN";
 const MOD_SPLIT_FACTOR: usize = 3;
 
-pub fn prepare(arg: &Args, df: DataFrame) -> GroupedDatasets {
+pub fn prepare(args: &Args, df: DataFrame) -> GroupedDatasets {
 	let mut grouped_datasets = fill_grouped_datasets(&df);
 
-	normalize(&grouped_datasets);
+	normalize(args, &mut grouped_datasets);
 
 	grouped_datasets
 }
@@ -100,7 +100,8 @@ fn get_capacity(df: &DataFrame) -> usize {
 	capacity
 }
 
-fn normalize
+fn normalize(args: &Args, grouped_datasets: &mut GroupedDatasets) {
+	
 
 #[cfg(test)]
 mod tests {

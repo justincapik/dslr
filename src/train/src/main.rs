@@ -1,15 +1,25 @@
-mod learn;
-mod prepare;
+// mod learn;
+// mod prepare;
 
 use std::path::PathBuf;
 
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use polars::error::PolarsResult;
 
 use float::Float;
-use prepare::GroupedDatasets;
+
+#[derive(ValueEnum, Default, Clone, PartialEq)]
+#[cfg(debug_assertions)]
+#[derive(Debug)]
+pub enum Normalization {
+	MinMax,
+	#[default]
+	StdDev,
+}
 
 #[derive(Parser)]
+#[cfg(debug_assertions)]
+#[derive(Debug)]
 #[command(about)]
 pub struct Args {
 	/// path to the csv file to train from
@@ -27,21 +37,25 @@ pub struct Args {
 	/// number of gradient descent iterations
 	#[clap(long = "iter", short = 'i', default_value = "100000")]
 	iteration: usize,
+
+	/// data normalization method
+	#[clap(long = "norm", short = 'n', default_value = "std-dev")]
+	normalization: Normalization,
 }
 
 fn main() -> PolarsResult<()> {
 	let args = Args::parse();
 
-	dbg!(&args.path, &args.output);
+	dbg!(&args);
 
 	let df = load::load(&args.path)?;
 
-	let grouped_datasets = prepare::prepare(df);
+	// let grouped_datasets = prepare::prepare(args, df);
 
-	dbg!(grouped_datasets
-		.iter()
-		.map(|(label, dataset)| (label, dataset.training.len(), dataset.testing.len()))
-		.collect::<Vec<_>>());
+	// dbg!(grouped_datasets
+	// 	.iter()
+	// 	.map(|(label, dataset)| (label, dataset.training.len(), dataset.testing.len()))
+	// 	.collect::<Vec<_>>());
 
 	// learn::learn(&args, grouped_datasets);
 

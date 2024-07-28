@@ -3,8 +3,6 @@ use hypothesis::hypothesis;
 use indicatif::ProgressIterator;
 use model::Model;
 
-use crate::{prepare::GroupedDatasets, Args};
-
 /*
 pub fn learn(arg: &Args, grouped_datasets: GroupedDatasets) {
 	let mut model = Model::default();
