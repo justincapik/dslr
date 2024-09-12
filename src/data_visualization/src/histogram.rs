@@ -44,7 +44,7 @@ fn make_trace(
 
 	col.retain(|x| *x != 0.0);
 	let slice: Vec<&f64> = col.iter().take(3).collect();
-	println!("{name}: {:?}...", slice);
+	// println!("{name}: {:?}...", slice);
 	if (col.is_empty()) {
 		Err("No float values in column")?;
 	}
@@ -70,25 +70,61 @@ fn make_trace(
 		.y_axis(format!("y{}", i)))
 }
 
+fn write_trace(
+	name: &str,
+	house_name: &str,
+	i: usize,
+	one_house: DataFrame,
+	legend_check: &mut usize,
+	plot: &mut Plot,
+	check: &mut bool,
+	layout: &mut Layout,
+) {
+	let series = one_house.column(name).unwrap();
+	let annot = Annotation::new()
+		.y(1.1)
+		.x(0.5)
+		.y_ref(format!("y{} domain", i))
+		.x_ref(format!("x{} domain", i))
+		.y_anchor(Anchor::Top)
+		.x_anchor(Anchor::Center)
+		.show_arrow(false)
+		.text(format!("{}", name));
+
+	match make_trace(name, i, series, house_name) {
+		Err(e) => (), /*println!("column error: {}", e)*/
+		Ok(mut trace) => {
+			if (*legend_check < 4) {
+				trace = trace.name(house_name);
+				*legend_check += 1;
+			} else {
+				trace = trace.show_legend(false);
+			}
+			*check = true;
+			plot.add_trace(trace);
+			(*layout).add_annotation(annot);
+			// println!("{name} grade for {house_name} added !");
+		}
+	};
+}
+
 pub fn histogram_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 	let mut plot = Plot::new();
 
+	let layoutgrid = LayoutGrid::new()
+		.rows(4)
+		.columns(4)
+		.pattern(GridPattern::Independent);
+	let legend = Legend::new()
+		.title("Houses")
+		.item_sizing(ItemSizing::Constant)
+		.border_color(NamedColor::Black)
+		.border_width(1)
+		.background_color(NamedColor::GhostWhite);
 	let mut layout = Layout::new()
-		.grid(
-			LayoutGrid::new()
-				.rows(4)
-				.columns(4)
-				.pattern(GridPattern::Independent),
-		)
-		.legend(
-			Legend::new()
-				.title("Houses")
-				.item_sizing(ItemSizing::Constant)
-				.border_color(NamedColor::Black)
-				.border_width(1)
-				.background_color(NamedColor::GhostWhite),
-		)
-		.title("Hogwarts Houses histograms, for each class");
+		.grid(layoutgrid)
+		.legend(legend)
+		.title("Hogwarts Houses histogram plots, for each class");
 
 	let mut legend_check = 0;
 	let mut i = 1;
@@ -101,32 +137,16 @@ pub fn histogram_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 				.lazy()
 				.filter(col("Hogwarts House").eq(lit(house_name)))
 				.collect()?;
-			let series = one_house.column(name).unwrap();
-			match make_trace(name, i, series, house_name) {
-				Err(e) => println!("column error: {}", e),
-				Ok(mut trace) => {
-					if (legend_check < 4) {
-						trace = trace.name(house_name);
-						legend_check += 1;
-					} else {
-						trace = trace.show_legend(false);
-					}
-					check = true;
-					plot.add_trace(trace);
-					layout.add_annotation(
-						Annotation::new()
-							.y(1.1)
-							.x(0.5)
-							.y_ref(format!("y{} domain", i))
-							.x_ref(format!("x{} domain", i))
-							.y_anchor(Anchor::Top)
-							.x_anchor(Anchor::Center)
-							.show_arrow(false)
-							.text(format!("{}", name)),
-					);
-					println!("{name} added !");
-				}
-			};
+			write_trace(
+				name,
+				house_name,
+				i,
+				one_house,
+				&mut legend_check,
+				&mut plot,
+				&mut check,
+				&mut layout,
+			)
 		}
 		if (check) {
 			i += 1;

@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 	println!("test: {:}", data);
 
-	// scatter_plot::simple_scatter_plot(data)?;
+	// scatter_plot::simple_scatter_plot(data.clone())?;
 	// histogram::histogram_plot(data.clone());
 	pair_plot::pair_plot(data);
 
