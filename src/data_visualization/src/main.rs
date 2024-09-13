@@ -17,13 +17,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 		return Err("Invalid file".into());
 	};
 
-	let data = data;
+	let data = parse_cols::transform_data(data)?;
 
 	println!("test: {:}", data);
 
-	// scatter_plot::simple_scatter_plot(data.clone())?;
-	// histogram::histogram_plot(data.clone());
-	pair_plot::pair_plot(data);
+	scatter_plot::simple_scatter_plot(data.clone())?;
+	histogram::histogram_plot(data.clone())?;
+	// pair_plot::pair_plot(data);
 
 	Ok(())
 }

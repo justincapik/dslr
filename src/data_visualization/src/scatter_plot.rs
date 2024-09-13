@@ -95,7 +95,10 @@ fn write_trace(
 		.text(format!("{}", name));
 
 	match make_trace(name, i, series, house_name) {
-		Err(e) => (), /*println!("column error: {}", e)*/
+		Err(e) => {
+			println!("column error: {}", e);
+			()
+		}
 		Ok(mut trace) => {
 			if (*legend_check < 4) {
 				trace = trace.name(house_name);
