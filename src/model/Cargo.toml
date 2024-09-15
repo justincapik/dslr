@@ -1,0 +1,12 @@
+[package]
+name = "model"
+version = "0.1.0"
+edition = "2021"
+authors = [
+	"jucapik <jucapik@student.42.fr>",
+	"adelille <adelille@student.42.fr>",
+]
+description = "read or write to a file the one vs all trained model"
+
+[dependencies]
+float = { path = "../float" }

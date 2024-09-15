@@ -1,5 +1,14 @@
 [workspace]
-members = ["src/some_lib", "src/some_binary", "src/data_visualization"]
+members = [
+	"src/float",
+	"src/load",
+	"src/analyze",
+	"src/describe",
+    "src/data_visualization",
+	"src/model",
+	"src/hypothesis",
+	"src/train",
+]
 resolver = "2"
 
 
