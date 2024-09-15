@@ -18,7 +18,6 @@ fn normalize_dataset(method: Normalization, dataset: &mut Dataset, analysis: &[A
 	let expect = |r#type: &str| panic!("float feature must have a {type}");
 
 	for row in dataset {
-		dbg!(&row);
 		for (feature, analysis) in row.iter_mut().zip(analysis.iter()) {
 			*feature = match method {
 				Normalization::MinMax => {
@@ -26,7 +25,6 @@ fn normalize_dataset(method: Normalization, dataset: &mut Dataset, analysis: &[A
 						analysis.min.unwrap_or_else(|| expect("min")),
 						analysis.max.unwrap_or_else(|| expect("max")),
 					);
-					dbg!(&feature, max, min);
 					(*feature - min) / (max - min)
 				}
 				Normalization::StdDev => {
@@ -65,12 +63,8 @@ mod tests {
 		let method = Normalization::MinMax;
 
 		let data = [("one", [1.0, 2.0, 3.0]), ("two", [2.0, 3.0, 4.0])];
-		let mut dataset = Vec::with_capacity(data[0].1.len());
-		for i in 0..data[0].1.len() {
-			dataset.push(data.iter().map(|(_, values)| values[i]).collect::<Vec<_>>());
-		}
-		let dataset = (0..data[0].1.len())
-			.map(|i| data.iter().map(|(_, values)| values[i]).collect::<Vec<_>())
+		let mut dataset = (0..data[0].1.len())
+			.map(|i| data.iter().map(|(_, values)| values[i]).collect::<Vec<_>>())
 			.collect::<Vec<_>>();
 		let analysis = data
 			.iter()
@@ -90,19 +84,16 @@ mod tests {
 		let method = Normalization::StdDev;
 
 		let data = [("one", [1.0, 3.0]), ("two", [2.0, 4.0])];
-		let mut dataset = data
-			.iter()
-			.map(|(_, values)| values.to_vec())
+		let mut dataset = (0..data[0].1.len())
+			.map(|i| data.iter().map(|(_, values)| values[i]).collect::<Vec<_>>())
 			.collect::<Vec<_>>();
 		let analysis = data
 			.iter()
 			.map(|(name, values)| Analysis::from(Series::new(name, values)))
 			.collect::<Vec<_>>();
 
-		dbg!(&dataset, &analysis);
-
 		normalize_dataset(method, &mut dataset, &analysis);
 
-		assert_eq!(dataset, vec![vec![-1.0, 1.0], vec![-1.0, 1.0]],);
+		assert_eq!(dataset, vec![vec![-1.0, -1.0], vec![1.0, 1.0]],);
 	}
 }
