@@ -1,6 +1,3 @@
-#![allow(dead_code)]
-#![allow(unused)]
-
 use std::{error::Error, process};
 
 use polars::frame::DataFrame;
