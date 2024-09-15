@@ -21,7 +21,7 @@ pub type Features = Vec<Float>;
 pub fn prepare(args: &Args, df: DataFrame) -> GroupedDatasets {
 	let mut grouped_datasets = parse::datasets(&df);
 
-	normalize::normalize(args, &df, &mut grouped_datasets);
+	// normalize::normalize(args, &df, &mut grouped_datasets);
 
 	grouped_datasets
 }

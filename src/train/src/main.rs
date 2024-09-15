@@ -31,7 +31,7 @@ pub struct Args {
 	output: PathBuf,
 
 	/// learning rate
-	#[clap(long = "rate", short = 'r', default_value = "0.1")]
+	#[clap(long = "rate", short = 'r', default_value = "0.01")]
 	learning_rate: Float,
 
 	/// number of gradient descent iterations
