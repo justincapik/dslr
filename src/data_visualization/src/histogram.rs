@@ -12,10 +12,7 @@ use plotly::common::{Anchor, ErrorData, ErrorType, Orientation};
 use plotly::histogram::{Bins, Cumulative, HistFunc, HistNorm};
 use plotly::layout::{BoxMode, Margin, TraceOrder};
 use plotly::{Bar, BoxPlot, Histogram};
-use polars::error::{polars_bail, PolarsError};
-use polars::frame::DataFrame;
-use polars::prelude::{col, lit, IntoLazy};
-use polars::series::Series;
+use polars::prelude::*;
 use rand;
 use rand_distr::{Distribution, Normal, Uniform};
 
