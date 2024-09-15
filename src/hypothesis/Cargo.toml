@@ -10,3 +10,4 @@ description = "Estimate y based on array x and array theta"
 
 [dependencies]
 float = { path = "../float" }
+model = { path = "../model" }
