@@ -35,7 +35,7 @@ pub struct Args {
 	learning_rate: Float,
 
 	/// number of gradient descent iterations
-	#[clap(long = "iter", short = 'i', default_value = "100000")]
+	#[clap(long = "iter", short = 'i', default_value = "1000000")]
 	iteration: usize,
 
 	/// data normalization method
@@ -57,7 +57,7 @@ fn main() -> PolarsResult<()> {
 		.map(|(label, dataset)| (label, dataset.training.len(), dataset.testing.len()))
 		.collect::<Vec<_>>());
 
-	// learn::learn(&args, grouped_datasets);
+	let model = learn::learn(&args, grouped_datasets);
 
 	Ok(())
 }

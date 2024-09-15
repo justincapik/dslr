@@ -12,6 +12,7 @@ pub fn normalize(args: &Args, df: &DataFrame, grouped_datasets: &mut GroupedData
 		normalize_dataset(args.normalization, &mut datasets.training, &analysis);
 		normalize_dataset(args.normalization, &mut datasets.testing, &analysis);
 	}
+	dbg!(grouped_datasets);
 }
 
 fn normalize_dataset(method: Normalization, dataset: &mut Dataset, analysis: &[Analysis]) {
