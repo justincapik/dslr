@@ -35,7 +35,7 @@ pub struct Args {
 	learning_rate: Float,
 
 	/// number of gradient descent iterations
-	#[clap(long = "iter", short = 'i', default_value = "1000000")]
+	#[clap(long = "iter", short = 'i', default_value = "10000")]
 	iteration: usize,
 
 	/// data normalization method

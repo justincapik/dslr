@@ -48,8 +48,13 @@ fn guess(
 	let mut new_thetas = thetas.to_vec();
 	let truth = if truth { 1.0 } else { 0.0 };
 
-	for (new_theta, row) in new_thetas.iter_mut().zip(rows.iter()) {
-		*new_theta -= learning_rate * (hypothesis(row, thetas) - truth);
+	for (i, new_theta) in new_thetas.iter_mut().enumerate() {
+		let sum = rows
+			.iter()
+			.map(|row| (hypothesis(row, thetas) - truth) * row[i])
+			.sum::<Float>();
+
+		*new_theta -= learning_rate * (sum / rows.len() as Float);
 	}
 
 	new_thetas
