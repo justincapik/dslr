@@ -45,11 +45,13 @@ fn main() -> PolarsResult<()> {
 
 	let df = load::load(&args.path)?;
 
-	let grouped_datasets = prepare::prepare(&args, df);
+	let (grouped_datasets, model) = prepare::prepare(&args, df);
 
-	let model = learn::learn(&args, &grouped_datasets);
+	let model = learn::learn(&args, &grouped_datasets, model);
 
 	loss::print_result(&grouped_datasets, &model);
+
+	model.write(&args.output)?;
 
 	Ok(())
 }

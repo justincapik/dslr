@@ -5,9 +5,10 @@ use std::collections::HashMap;
 
 use analyze::Analysis;
 use float::Float;
+use model::Model;
 use polars::prelude::*;
 
-use crate::Args;
+use crate::{Args, Normalization};
 
 pub type GroupedDatasets = HashMap<String, Datasets>;
 
@@ -19,14 +20,16 @@ pub struct Datasets {
 pub type Dataset = Vec<Features>;
 pub type Features = Vec<Float>;
 
-pub fn prepare(args: &Args, df: DataFrame) -> GroupedDatasets {
+pub fn prepare(args: &Args, df: DataFrame) -> (GroupedDatasets, Model) {
 	let analysis = features_analysis(&df);
 
 	let mut grouped_datasets = parse::datasets(&df, &analysis);
 
+	let model = store_analysis(&analysis, &args);
+
 	normalize::normalize(args, &mut grouped_datasets, &analysis);
 
-	grouped_datasets
+	(grouped_datasets, model)
 }
 
 fn features_analysis(df: &DataFrame) -> Vec<Analysis> {
@@ -39,4 +42,31 @@ fn features_analysis(df: &DataFrame) -> Vec<Analysis> {
 	}
 
 	features_analysis
+}
+
+fn store_analysis(analysis: &[Analysis], args: &Args) -> Model {
+	let expect = |r#type: &str| panic!("float feature must have a {type}");
+
+	let mut model = Model::default();
+
+	for feature_analysis in analysis {
+		match args.normalization {
+			Normalization::MinMax => {
+				model.normalization_factors.push((
+					feature_analysis.min.unwrap_or_else(|| expect("min")),
+					feature_analysis.max.unwrap_or_else(|| expect("max")),
+				));
+			}
+			Normalization::StdDev => {
+				model.normalization_factors.push((
+					feature_analysis.mean.unwrap_or_else(|| expect("mean")),
+					feature_analysis
+						.std
+						.unwrap_or_else(|| expect("stdandard deviation")),
+				));
+			}
+		}
+	}
+
+	model
 }

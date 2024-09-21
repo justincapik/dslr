@@ -5,9 +5,7 @@ use model::Model;
 
 use crate::{prepare::GroupedDatasets, Args};
 
-pub fn learn(arg: &Args, grouped_datasets: &GroupedDatasets) -> Model {
-	let mut model = Model::default();
-
+pub fn learn(arg: &Args, grouped_datasets: &GroupedDatasets, mut model: Model) -> Model {
 	for (label, datasets) in grouped_datasets.iter() {
 		model.weights.insert(
 			label.clone(),
