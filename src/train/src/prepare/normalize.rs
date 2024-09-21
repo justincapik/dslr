@@ -1,18 +1,14 @@
 use analyze::Analysis;
-use polars::frame::DataFrame;
 
 use crate::{Args, Normalization};
 
 use super::{Dataset, GroupedDatasets};
 
-pub fn normalize(args: &Args, df: &DataFrame, grouped_datasets: &mut GroupedDatasets) {
-	let analysis = features_analysis(df);
-
+pub fn normalize(args: &Args, grouped_datasets: &mut GroupedDatasets, analysis: &[Analysis]) {
 	for (_, datasets) in grouped_datasets.iter_mut() {
 		normalize_dataset(args.normalization, &mut datasets.training, &analysis);
 		normalize_dataset(args.normalization, &mut datasets.testing, &analysis);
 	}
-	dbg!(grouped_datasets);
 }
 
 fn normalize_dataset(method: Normalization, dataset: &mut Dataset, analysis: &[Analysis]) {
@@ -40,18 +36,6 @@ fn normalize_dataset(method: Normalization, dataset: &mut Dataset, analysis: &[A
 			};
 		}
 	}
-}
-
-fn features_analysis(df: &DataFrame) -> Vec<Analysis> {
-	let mut features_analysis = Vec::new();
-
-	for col in df.get_columns() {
-		if col.dtype().is_float() {
-			features_analysis.push(Analysis::from(col));
-		}
-	}
-
-	features_analysis
 }
 
 #[cfg(test)]

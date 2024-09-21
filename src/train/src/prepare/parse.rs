@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use analyze::Analysis;
 use float::Float;
 use polars::{frame::DataFrame, prelude::DataType};
 
@@ -8,7 +9,7 @@ use super::{Datasets, GroupedDatasets};
 const UNKNOWN_LABEL: &str = "UNKNOWN";
 const MOD_SPLIT_FACTOR: usize = 3;
 
-pub fn datasets(df: &DataFrame) -> GroupedDatasets {
+pub fn datasets(df: &DataFrame, analysis: &[Analysis]) -> GroupedDatasets {
 	let mut grouped_datasets = HashMap::new();
 
 	let capacity = get_capacity(&df);
@@ -32,11 +33,15 @@ pub fn datasets(df: &DataFrame) -> GroupedDatasets {
 				);
 			}
 
-			if cell.dtype().is_float() {
+			if cell.dtype().is_float() || cell.is_null() {
 				row_data.push(
 					cell.cast(&DataType::Float32)
 						.try_extract::<Float>()
-						.unwrap_or(0.0),
+						.unwrap_or(
+							analysis[row_data.len()]
+								.mean
+								.unwrap_or_else(|| panic!("float feature must have a mean")),
+						),
 				);
 			}
 		}
@@ -74,6 +79,7 @@ fn get_capacity(df: &DataFrame) -> usize {
 
 #[cfg(test)]
 mod tests {
+	use super::super::features_analysis;
 	use super::*;
 	use polars::prelude::*;
 
@@ -86,7 +92,7 @@ mod tests {
 		])
 		.unwrap();
 
-		let grouped_datasets = datasets(&df);
+		let grouped_datasets = datasets(&df, &features_analysis(&df));
 
 		assert_eq!(grouped_datasets.len(), 3);
 
@@ -121,7 +127,7 @@ mod tests {
 		])
 		.unwrap();
 
-		let grouped_datasets = datasets(&df);
+		let grouped_datasets = datasets(&df, &features_analysis(&df));
 
 		assert_eq!(grouped_datasets.len(), 1);
 
@@ -143,7 +149,7 @@ mod tests {
 		])
 		.unwrap();
 
-		let grouped_datasets = datasets(&df);
+		let grouped_datasets = datasets(&df, &features_analysis(&df));
 
 		assert_eq!(grouped_datasets.len(), 3);
 
@@ -179,7 +185,7 @@ mod tests {
 		])
 		.unwrap();
 
-		let grouped_datasets = datasets(&df);
+		let grouped_datasets = datasets(&df, &features_analysis(&df));
 
 		assert_eq!(grouped_datasets.len(), 3);
 
