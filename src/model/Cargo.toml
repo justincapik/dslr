@@ -10,4 +10,5 @@ description = "read or write to a file the one vs all trained model"
 
 [dependencies]
 float = { path = "../float" }
+hmerr = { git = "https://github.com/Alexdelia/yahmrslib.git" }
 csv = "1.3.0"

@@ -61,6 +61,7 @@ mod tests {
 			]
 			.into_iter()
 			.collect(),
+			..Default::default()
 		};
 
 		let mut max = (String::new(), Float::MIN);
