@@ -11,7 +11,7 @@ pub fn learn(arg: &Args, grouped_datasets: &GroupedDatasets) -> Model {
 	for (label, datasets) in grouped_datasets.iter() {
 		model.weights.insert(
 			label.clone(),
-			vec![0.0; datasets.training.get(0).expect("empty row").len()],
+			vec![0.0; datasets.training.first().expect("empty row").len()],
 		);
 	}
 

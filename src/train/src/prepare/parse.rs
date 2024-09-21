@@ -12,7 +12,7 @@ const MOD_SPLIT_FACTOR: usize = 3;
 pub fn datasets(df: &DataFrame, analysis: &[Analysis]) -> GroupedDatasets {
 	let mut grouped_datasets = HashMap::new();
 
-	let capacity = get_capacity(&df);
+	let capacity = get_capacity(df);
 
 	let mut iters = df.iter().map(|s| s.iter()).collect::<Vec<_>>();
 
@@ -23,7 +23,7 @@ pub fn datasets(df: &DataFrame, analysis: &[Analysis]) -> GroupedDatasets {
 		for iter in &mut iters {
 			let cell = iter
 				.next()
-				.expect(&format!("there must be a value on row {row}"));
+				.unwrap_or_else(|| panic!("there must be a value on row {row}"));
 
 			if cell.dtype().is_string() && label.is_none() {
 				label = Some(

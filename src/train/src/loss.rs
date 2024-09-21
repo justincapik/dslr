@@ -118,7 +118,7 @@ fn dataset_loss(truth: &str, dataset: &Dataset, model: &Model) -> usize {
 	let mut correct = 0;
 
 	for row in dataset {
-		let prediction = one_vs_all(&row, model);
+		let prediction = one_vs_all(row, model);
 		if &prediction == truth {
 			correct += 1;
 		}

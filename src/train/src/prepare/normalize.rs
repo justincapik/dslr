@@ -6,8 +6,8 @@ use super::{Dataset, GroupedDatasets};
 
 pub fn normalize(args: &Args, grouped_datasets: &mut GroupedDatasets, analysis: &[Analysis]) {
 	for (_, datasets) in grouped_datasets.iter_mut() {
-		normalize_dataset(args.normalization, &mut datasets.training, &analysis);
-		normalize_dataset(args.normalization, &mut datasets.testing, &analysis);
+		normalize_dataset(args.normalization, &mut datasets.training, analysis);
+		normalize_dataset(args.normalization, &mut datasets.testing, analysis);
 	}
 }
 
