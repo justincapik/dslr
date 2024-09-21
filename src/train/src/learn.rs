@@ -31,12 +31,7 @@ pub fn learn(arg: &Args, grouped_datasets: &GroupedDatasets) -> Model {
 	model
 }
 
-fn guess(
-	thetas: &[Float],
-	rows: &Vec<Vec<Float>>,
-	learning_rate: Float,
-	truth: bool,
-) -> Vec<Float> {
+fn guess(thetas: &[Float], rows: &[Vec<Float>], learning_rate: Float, truth: bool) -> Vec<Float> {
 	let mut new_thetas = thetas.to_vec();
 	let truth = if truth { 1.0 } else { 0.0 };
 
