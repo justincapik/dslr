@@ -1,37 +1,15 @@
-#![allow(dead_code)]
-#![allow(unused)]
+use plotly::color::NamedColor;
 
-use itertools_num::linspace;
-use plotly::common::{
-	self, ColorScale, ColorScalePalette, DashType, Fill, Font, Line, LineShape, Marker, Mode, Title,
-};
-use plotly::layout::{self, Annotation, Axis, BarMode, Layout, Legend, TicksDirection};
-use plotly::Scatter;
+use plotly::layout::{Annotation, GridPattern, ItemSizing, Layout, LayoutGrid, Legend};
+use plotly::{Histogram, Scatter};
 use plotly::{ImageFormat, Plot};
 
-use plotly::box_plot::{BoxMean, BoxPoints};
-use plotly::color::{NamedColor, Rgb, Rgba};
-use plotly::common::{Anchor, ErrorData, ErrorType, Orientation};
-use plotly::histogram::{Bins, Cumulative, HistFunc, HistNorm};
-use plotly::layout::{BoxMode, Margin, TraceOrder};
-use plotly::{Bar, BoxPlot, Histogram};
-use polars::error::{polars_bail, PolarsError};
-use polars::frame::DataFrame;
-use polars::prelude::{col, lit, IntoLazy};
-use polars::series::Series;
-use rand;
-use rand_distr::{Distribution, Normal, Uniform};
+use plotly::common::{Anchor, Marker, Mode};
 
-use plotly::common::Side;
-use plotly::layout::ItemSizing;
-use plotly::layout::{GridPattern, LayoutGrid, RowOrder};
-
-use std::{error::Error, process};
-
-use crate::main;
+use polars::prelude::*;
+use std::error::Error;
 
 fn make_histogram_trace(
-	name: &str,
 	i: usize,
 	data: &Series,
 	house_name: &str,
@@ -45,18 +23,9 @@ fn make_histogram_trace(
 		.collect();
 
 	col.retain(|x| *x != 0.0);
-	let slice: Vec<&f64> = col.iter().take(3).collect();
-	println!("{name}: {:?}...", slice);
-	if (col.is_empty()) {
+	if col.is_empty() {
 		Err("No float values in column")?;
 	}
-
-	let min = 0.0;
-	let max = col.len() as f64;
-	let n = (max - min) as usize;
-	// col.sort_by(|a, b| a.partial_cmp(b).unwrap());
-	//let t = sample_uniform_distribution(n, min, max);
-	let y = col;
 
 	let color = match house_name {
 		"Gryffindor" => NamedColor::Red,
@@ -66,14 +35,13 @@ fn make_histogram_trace(
 		_ => NamedColor::Black,
 	};
 
-	Ok(Histogram::new(y)
+	Ok(Histogram::new(col)
 		.marker(Marker::new().color(color))
 		.x_axis(format!("x{}", i))
 		.y_axis(format!("y{}", i)))
 }
 
 fn make_scatter_trace(
-	name: &str,
 	i: usize,
 	mdata: &Series,
 	sdata: &Series,
@@ -94,17 +62,10 @@ fn make_scatter_trace(
 		.collect();
 
 	mcol.retain(|x| *x != 0.0);
-	let slice: Vec<&f64> = mcol.iter().take(3).collect();
 	scol.retain(|x| *x != 0.0);
-	let slice: Vec<&f64> = scol.iter().take(3).collect();
-	println!("{name}: {:?}...", slice);
-	if (mcol.is_empty() || scol.is_empty()) {
+	if mcol.is_empty() || scol.is_empty() {
 		Err("No float values in column")?;
 	}
-
-	// col.sort_by(|a, b| a.partial_cmp(b).unwrap());
-	//let t = sample_uniform_distribution(n, min, max);
-	// let y = col;
 
 	let color = match house_name {
 		"Gryffindor" => NamedColor::Red,
@@ -141,10 +102,10 @@ fn write_histogram_trace(
 		.x_anchor(Anchor::Center)
 		.show_arrow(false)
 		.text(format!("{}", main_name));
-	match make_histogram_trace(main_name, i, mseries, house_name) {
-		Err(e) => println!("column error: {}", e),
+	match make_histogram_trace(i, mseries, house_name) {
+		Err(_) => (),
 		Ok(mut trace) => {
-			if (*legend_check < 4) {
+			if *legend_check < 4 {
 				trace = trace.name(house_name);
 				*legend_check += 1;
 			} else {
@@ -180,10 +141,10 @@ fn write_scatter_trace(
 		.show_arrow(false)
 		.text(format!("{} vs {}", main_name, sec_name));
 
-	match make_scatter_trace(main_name, i, mseries, sseries, house_name) {
-		Err(e) => println!("column error: {}", e),
+	match make_scatter_trace(i, mseries, sseries, house_name) {
+		Err(_) => (),
 		Ok(mut trace) => {
-			if (*legend_check < 4) {
+			if *legend_check < 4 {
 				trace = trace.name(house_name);
 				*legend_check += 1;
 			} else {
@@ -212,7 +173,7 @@ fn create_single_plot(
 			.lazy()
 			.filter(col("Hogwarts House").eq(lit(house_name)))
 			.collect()?;
-		if (main_name == sec_name) {
+		if main_name == sec_name {
 			write_histogram_trace(
 				main_name,
 				house_name,
@@ -237,13 +198,13 @@ fn create_single_plot(
 			)
 		}
 	}
-	if (check) {
+	if check {
 		*i += 1;
 	}
 	Ok(())
 }
 
-pub fn pair_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
+pub fn pair_plot(data: &DataFrame, path_name: &String) -> Result<(), Box<dyn Error>> {
 	let mut plot = Plot::new();
 	let useful_subjects = [
 		"Divination",
@@ -272,7 +233,6 @@ pub fn pair_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 	let mut legend_check = 0;
 	let mut i = 1;
 	for main_name in useful_subjects {
-		println!("Adding {main_name}");
 		for sec_name in useful_subjects {
 			create_single_plot(
 				main_name,
@@ -284,11 +244,11 @@ pub fn pair_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 				&mut plot,
 			)?
 		}
-		println!("{main_name} added !");
+		// println!("{main_name} added");
 	}
 	plot.set_layout(layout);
 
-	plot.write_image("pair_plot.png", ImageFormat::PNG, 1500, 1500, 1.0);
+	plot.write_image(path_name, ImageFormat::PNG, 1500, 1500, 1.0);
 
 	Ok(())
 }

@@ -1,22 +1,10 @@
-#![allow(dead_code)]
-#![allow(unused)]
-
-use std::{error::Error, fs::File, io::Read};
-
-use polars::{docs::lazy, prelude::*};
-
-use chrono::{DateTime, NaiveDate, Utc};
+use polars::prelude::*;
 
 use rand_distr::num_traits::Num;
-use std::str::FromStr;
 
-use rand;
-use rand::Rng;
-// use rand::Rng::gen_range;
+// use rand;
 
 pub fn load_as_cols(filename: &str) -> PolarsResult<DataFrame> {
-	let file = File::open(filename)?;
-
 	let df = CsvReadOptions::default()
 		.with_has_header(true)
 		.try_into_reader_with_file_path(Some(filename.into()))?
@@ -25,41 +13,10 @@ pub fn load_as_cols(filename: &str) -> PolarsResult<DataFrame> {
 	Ok(df)
 }
 
-pub fn transform_data(df: DataFrame) -> PolarsResult<DataFrame> {
+pub fn transform_data(df: &mut DataFrame) -> PolarsResult<()> {
 	// convert and add date columns
 
-	let year_since = "1980-01-01";
-	let year_col = Series::new(
-		"Year of Birth",
-		df.column("Birthday").cloned()?, // .as_datetime()?
-		                                 // .datetime()
-		                                 // .unwrap()
-		                                 // .as_datetime_iter()
-		                                 // .map(|d| {
-		                                 // 	d.unwrap()
-		                                 // 		.date()
-		                                 // 		.years_since(NaiveDate::parse_from_str(year_since, "%Y-%m-%d").unwrap())
-		                                 // 		.unwrap()
-		                                 // })
-		                                 // .collect::<Vec<_>>(),
-	);
-
-	// let out = df
-	// 	.clone()
-	// 	.lazy()
-	// 	.select([col("Birthday")
-	// 		.str()
-	// 		.to_datetime(
-	// 			Some(TimeUnit::Microseconds),
-	// 			None,
-	// 			StrptimeOptions::default(),
-	// 			lit("raise"),
-	// 		)
-	// 		.alias("day")])
-	// 	.collect()?;
-	// println!("{}", out);
-
-	let mut rng = rand::thread_rng();
+	// let mut rng = rand::thread_rng();
 
 	let birth_year: Series = df
 		.column("Birthday")?
@@ -91,17 +48,10 @@ pub fn transform_data(df: DataFrame) -> PolarsResult<DataFrame> {
 
 	let day_of_year = (birth_day.clone() + birth_month.clone() * 30.5).unwrap();
 
-	let mut binding = df.clone();
-	binding.with_column(birth_year.clone().with_name("Year of birth"));
-	binding.with_column(birth_month.clone().with_name("Month of birth"));
-	// binding.with_column(birth_day.clone().with_name("Day of month of Birth"));
-	binding.with_column(day_of_year.clone().with_name("Day of year (Birthday)"));
+	df.with_column(birth_year.clone().with_name("Year of birth"))?;
+	df.with_column(birth_month.clone().with_name("Month of birth"))?;
+	// df.with_column(birth_day.clone().with_name("Day of month of Birth"))?;
+	df.with_column(day_of_year.clone().with_name("Day of year (Birthday)"))?;
 
-	let new = binding.clone();
-
-	println!("{:?}", birth_month);
-
-	let df = new.clone();
-
-	Ok(df)
+	Ok(())
 }

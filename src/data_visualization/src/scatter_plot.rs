@@ -1,40 +1,20 @@
-#![allow(dead_code)]
-#![allow(unused)]
+use plotly::common::{Anchor, Marker, Mode};
+use plotly::layout::{Annotation, Layout, Legend};
+use plotly::{ImageFormat, Plot, Scatter};
 
-use itertools_num::linspace;
-use plotly::common::{
-	self, ColorScale, ColorScalePalette, DashType, Fill, Font, Line, LineShape, Marker, Mode, Title,
-};
-use plotly::layout::{self, Annotation, Axis, BarMode, Layout, Legend, TicksDirection};
-use plotly::{plot, Scatter};
-use plotly::{ImageFormat, Plot};
+use plotly::color::NamedColor;
 
-use plotly::box_plot::{BoxMean, BoxPoints};
-use plotly::color::{NamedColor, Rgb, Rgba};
-use plotly::common::{Anchor, ErrorData, ErrorType, Orientation};
-use plotly::histogram::{Bins, Cumulative, HistFunc, HistNorm};
-use plotly::layout::{BoxMode, Margin, TraceOrder};
-use plotly::{Bar, BoxPlot, Histogram};
-use polars::error::{polars_bail, PolarsError};
-use polars::frame::DataFrame;
-use polars::prelude::{col, lit, IntoLazy};
-use polars::series::Series;
-use rand;
-use rand_distr::{Distribution, Normal, Uniform};
+use plotly::layout::{GridPattern, ItemSizing, LayoutGrid};
 
-use plotly::common::Side;
-use plotly::layout::ItemSizing;
-use plotly::layout::{GridPattern, LayoutGrid, RowOrder};
+use polars::prelude::*;
 
-use std::{error::Error, process};
+use std::error::Error;
 
 fn make_trace(
-	name: &str,
 	i: usize,
 	data: &Series,
 	house_name: &str,
 ) -> Result<Box<Scatter<f64, f64>>, Box<dyn Error>> {
-	//
 	let mut col: Vec<f64> = data
 		.f64()?
 		.into_iter()
@@ -43,20 +23,12 @@ fn make_trace(
 		.collect();
 
 	col.retain(|x| *x != 0.0);
-	let slice: Vec<&f64> = col.iter().take(3).collect();
-	// println!("{name}: {:?}", slice);
-	if (col.is_empty()) {
+	if col.is_empty() {
 		Err("No float values in column")?;
 	}
 
-	let min = 0.0;
-	let max = col.len() as f64;
-	let n = (max - min) as usize;
-	// col.sort_by(|a, b| a.partial_cmp(b).unwrap());
 	let t: Vec<f64> = col.iter().copied().rev().collect();
-	// let t = (&t[0..t.len() / 2]).to_vec();
 	let y = col;
-	// let y = (&y[0..y.len() / 2]).to_vec();
 
 	let color = match house_name {
 		"Gryffindor" => NamedColor::Red,
@@ -92,15 +64,12 @@ fn write_trace(
 		.y_anchor(Anchor::Top)
 		.x_anchor(Anchor::Center)
 		.show_arrow(false)
-		.text(format!("{}", name));
+		.text(name);
 
-	match make_trace(name, i, series, house_name) {
-		Err(e) => {
-			println!("column error: {}", e);
-			()
-		}
+	match make_trace(i, series, house_name) {
+		Err(_) => (),
 		Ok(mut trace) => {
-			if (*legend_check < 4) {
+			if *legend_check < 4 {
 				trace = trace.name(house_name);
 				*legend_check += 1;
 			} else {
@@ -114,7 +83,7 @@ fn write_trace(
 	};
 }
 
-pub fn simple_scatter_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
+pub fn simple_scatter_plot(data: &DataFrame, path_name: &String) -> Result<(), Box<dyn Error>> {
 	let mut plot = Plot::new();
 
 	let layoutgrid = LayoutGrid::new()
@@ -136,7 +105,7 @@ pub fn simple_scatter_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 
 	let mut i = 1;
 	for name in data.get_column_names() {
-		println!("Adding {name}");
+		// println!("Adding {name}");
 		let mut check = false;
 		for house_name in ["Ravenclaw", "Slytherin", "Hufflepuff", "Gryffindor"] {
 			let one_house: DataFrame = data
@@ -155,14 +124,14 @@ pub fn simple_scatter_plot(data: DataFrame) -> Result<(), Box<dyn Error>> {
 				&mut layout,
 			)
 		}
-		if (check) {
+		if check {
 			i += 1;
 		}
 	}
 
 	plot.set_layout(layout);
 
-	plot.write_image("scatter.png", ImageFormat::PNG, 1200, 1200, 1.0);
+	plot.write_image(path_name, ImageFormat::PNG, 1200, 1200, 1.0);
 
 	Ok(())
 }
