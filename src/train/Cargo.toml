@@ -20,3 +20,4 @@ polars = { version = "0.43", default-features = false, features = [
 ] }
 indicatif = "0.17"
 tabled = { git = "https://github.com/zhiburt/tabled.git" }
+itertools = "0.13.0"

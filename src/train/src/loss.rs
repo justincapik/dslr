@@ -1,5 +1,6 @@
 use float::Float;
 use hypothesis::one_vs_all;
+use itertools::Itertools;
 use model::Model;
 use tabled::{
 	builder::Builder,
@@ -89,7 +90,7 @@ pub fn print_result(grouped_datasets: &GroupedDatasets, model: &Model) {
 }
 
 fn fill_table(mut builder: Builder, grouped_datasets: &GroupedDatasets, model: &Model) -> Table {
-	for (label, datasets) in grouped_datasets.iter() {
+	for (label, datasets) in grouped_datasets.iter().sorted_by_key(|(label, _)| *label) {
 		let training_correct = dataset_loss(label, &datasets.training, model);
 		let training_total = datasets.training.len();
 		let training_percent = training_correct as Float / training_total as Float * 100.0;
