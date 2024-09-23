@@ -25,7 +25,7 @@ pub fn prepare(args: &Args, df: DataFrame) -> (GroupedDatasets, Model) {
 
 	let mut grouped_datasets = parse::datasets(&df, &analysis);
 
-	let model = store_analysis(&analysis, &args);
+	let model = store_analysis(&analysis, args);
 
 	normalize::normalize(args, &mut grouped_datasets, &analysis);
 
