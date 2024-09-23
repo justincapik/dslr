@@ -1,4 +1,5 @@
 mod learn;
+mod loss;
 mod prepare;
 
 use std::path::PathBuf;
@@ -9,8 +10,6 @@ use polars::error::PolarsResult;
 use float::Float;
 
 #[derive(ValueEnum, Default, Clone, Copy, PartialEq)]
-#[cfg(debug_assertions)]
-#[derive(Debug)]
 pub enum Normalization {
 	MinMax,
 	#[default]
@@ -18,8 +17,6 @@ pub enum Normalization {
 }
 
 #[derive(Parser)]
-#[cfg(debug_assertions)]
-#[derive(Debug)]
 #[command(about)]
 pub struct Args {
 	/// path to the csv file to train from
@@ -31,11 +28,11 @@ pub struct Args {
 	output: PathBuf,
 
 	/// learning rate
-	#[clap(long = "rate", short = 'r', default_value = "0.1")]
+	#[clap(long = "rate", short = 'r', default_value = "0.01")]
 	learning_rate: Float,
 
 	/// number of gradient descent iterations
-	#[clap(long = "iter", short = 'i', default_value = "100000")]
+	#[clap(long = "iter", short = 'i', default_value = "1000")]
 	iteration: usize,
 
 	/// data normalization method
@@ -46,18 +43,15 @@ pub struct Args {
 fn main() -> PolarsResult<()> {
 	let args = Args::parse();
 
-	dbg!(&args);
-
 	let df = load::load(&args.path)?;
 
-	let grouped_datasets = prepare::prepare(&args, df);
+	let (grouped_datasets, model) = prepare::prepare(&args, df);
 
-	dbg!(grouped_datasets
-		.iter()
-		.map(|(label, dataset)| (label, dataset.training.len(), dataset.testing.len()))
-		.collect::<Vec<_>>());
+	let model = learn::learn(&args, &grouped_datasets, model);
 
-	// learn::learn(&args, grouped_datasets);
+	loss::print_result(&grouped_datasets, &model);
+
+	model.write(&args.output)?;
 
 	Ok(())
 }
