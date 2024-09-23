@@ -15,7 +15,7 @@ model = { path = "../model" }
 analyze = { path = "../analyze" }
 hypothesis = { path = "../hypothesis" }
 clap = { version = "4", features = ["derive"] }
-polars = { version = "0.41", default-features = false, features = [
+polars = { version = "0.43", default-features = false, features = [
 	"performant",
 ] }
 indicatif = "0.17"

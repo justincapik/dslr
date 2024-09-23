@@ -86,9 +86,9 @@ mod tests {
 	#[test]
 	fn test_parse_basic() {
 		let df = DataFrame::new(vec![
-			Series::new("label", &["a", "b", "a", "c"]),
-			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
-			Series::new("two", &[5.0, 6.0, 7.0, 8.0]),
+			Series::new("label".into(), &["a", "b", "a", "c"]),
+			Series::new("one".into(), &[1.0, 2.0, 3.0, 4.0]),
+			Series::new("two".into(), &[5.0, 6.0, 7.0, 8.0]),
 		])
 		.unwrap();
 
@@ -122,8 +122,8 @@ mod tests {
 	#[test]
 	fn test_parse_missing_label() {
 		let df = DataFrame::new(vec![
-			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
-			Series::new("two", &[5.0, 6.0, 7.0, 8.0]),
+			Series::new("one".into(), &[1.0, 2.0, 3.0, 4.0]),
+			Series::new("two".into(), &[5.0, 6.0, 7.0, 8.0]),
 		])
 		.unwrap();
 
@@ -143,9 +143,9 @@ mod tests {
 	#[test]
 	fn test_parse_label_in_middle() {
 		let df = DataFrame::new(vec![
-			Series::new("one", &[1.0, 2.0, 3.0, 4.0]),
-			Series::new("label", &["a", "a", "b", "c"]),
-			Series::new("two", &[5.0, 6.0, 7.0, 8.0]),
+			Series::new("one".into(), &[1.0, 2.0, 3.0, 4.0]),
+			Series::new("label".into(), &["a", "a", "b", "c"]),
+			Series::new("two".into(), &[5.0, 6.0, 7.0, 8.0]),
 		])
 		.unwrap();
 
@@ -179,9 +179,9 @@ mod tests {
 	#[test]
 	fn test_parse_with_integer() {
 		let df = DataFrame::new(vec![
-			Series::new("label", &["a", "a", "b", "c"]),
-			Series::new("one", &[1, 2, 3, 4]),
-			Series::new("two", &[5.0, 6.0, 7.0, 8.0]),
+			Series::new("label".into(), &["a", "a", "b", "c"]),
+			Series::new("one".into(), &[1, 2, 3, 4]),
+			Series::new("two".into(), &[5.0, 6.0, 7.0, 8.0]),
 		])
 		.unwrap();
 
