@@ -48,10 +48,14 @@ pub fn transform_data(df: &mut DataFrame) -> PolarsResult<()> {
 
 	let day_of_year = (birth_day.clone() + birth_month.clone() * 30.5).unwrap();
 
-	df.with_column(birth_year.clone().with_name("Year of birth"))?;
-	df.with_column(birth_month.clone().with_name("Month of birth"))?;
+	df.with_column(birth_year.clone().with_name("Year of birth".into()))?;
+	df.with_column(birth_month.clone().with_name("Month of birth".into()))?;
 	// df.with_column(birth_day.clone().with_name("Day of month of Birth"))?;
-	df.with_column(day_of_year.clone().with_name("Day of year (Birthday)"))?;
+	df.with_column(
+		day_of_year
+			.clone()
+			.with_name("Day of year (Birthday)".into()),
+	)?;
 
 	Ok(())
 }
