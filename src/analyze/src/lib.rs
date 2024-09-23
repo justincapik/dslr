@@ -25,7 +25,7 @@ impl From<Series> for Analysis {
 
 impl From<&Series> for Analysis {
 	fn from(series: &Series) -> Self {
-		let name = series.name().to_owned();
+		let name = series.name().to_string();
 		let dtype = series.dtype().to_owned();
 
 		let mut ret = Self {
@@ -140,7 +140,7 @@ mod tests {
 	fn test_analysis_basic() {
 		let name = String::from("a");
 		let dtype = DataType::Float64;
-		let s = Series::new(&name, &[1.0, 2.0, 3.0, 4.0, 5.0]);
+		let s = Series::new((&name).into(), &[1.0, 2.0, 3.0, 4.0, 5.0]);
 
 		let a = Analysis::from(&s);
 
@@ -169,7 +169,7 @@ mod tests {
 	fn test_analysis_unsorted() {
 		let name = String::from("a");
 		let dtype = DataType::Float64;
-		let s = Series::new(&name, &[5.0, 2.0, 4.0, 1.0, 3.0]);
+		let s = Series::new((&name).into(), &[5.0, 2.0, 4.0, 1.0, 3.0]);
 
 		let a = Analysis::from(&s);
 
@@ -198,7 +198,7 @@ mod tests {
 	fn test_analysis_negative() {
 		let name = String::from("a");
 		let dtype = DataType::Float64;
-		let s = Series::new(&name, &[-42.0, -5.0, 0.0, 1.0, 2.0, 1001.0]);
+		let s = Series::new((&name).into(), &[-42.0, -5.0, 0.0, 1.0, 2.0, 1001.0]);
 
 		let a = Analysis::from(&s);
 
@@ -227,7 +227,10 @@ mod tests {
 	fn test_analysis_option() {
 		let name = String::from("a");
 		let dtype = DataType::Float64;
-		let s = Series::new(&name, &[Some(1.0), None, Some(3.0), None, Some(5.0)]);
+		let s = Series::new(
+			(&name).into(),
+			&[Some(1.0), None, Some(3.0), None, Some(5.0)],
+		);
 
 		let a = Analysis::from(&s);
 
@@ -256,7 +259,7 @@ mod tests {
 	fn test_analysis_int() {
 		let name = String::from("a");
 		let dtype = DataType::Int32;
-		let s = Series::new(&name, &[1, 2, 3, 4, 5]);
+		let s = Series::new((&name).into(), &[1, 2, 3, 4, 5]);
 
 		let a = Analysis::from(&s);
 
@@ -286,7 +289,7 @@ mod tests {
 		let name = String::from("a");
 		let dtype = DataType::Float32;
 		let empty: [Float; 0] = [];
-		let s = Series::new(&name, &empty);
+		let s = Series::new((&name).into(), &empty);
 
 		let a = Analysis::from(&s);
 
@@ -315,7 +318,7 @@ mod tests {
 	fn test_analysis_str() {
 		let name = String::from("a");
 		let dtype = DataType::String;
-		let s = Series::new(&name, &["a", "b", "c"]);
+		let s = Series::new((&name).into(), &["a", "b", "c"]);
 
 		let a = Analysis::from(&s);
 

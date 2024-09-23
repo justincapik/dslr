@@ -13,7 +13,7 @@ float = { path = "../float" }
 load = { path = "../load" }
 analyze = { path = "../analyze" }
 clap = { version = "4", features = ["derive"] }
-polars = { version = "0.41", default-features = false, features = [
+polars = { version = "0.43", default-features = false, features = [
 	"performant",
 ] }
 tabled = { git = "https://github.com/zhiburt/tabled.git" }

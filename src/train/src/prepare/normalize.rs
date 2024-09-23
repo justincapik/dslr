@@ -53,7 +53,7 @@ mod tests {
 			.collect::<Vec<_>>();
 		let analysis = data
 			.iter()
-			.map(|(name, values)| Analysis::from(Series::new(name, values)))
+			.map(|(name, values)| Analysis::from(Series::new((*name).into(), values)))
 			.collect::<Vec<_>>();
 
 		normalize_dataset(method, &mut dataset, &analysis);
@@ -74,7 +74,7 @@ mod tests {
 			.collect::<Vec<_>>();
 		let analysis = data
 			.iter()
-			.map(|(name, values)| Analysis::from(Series::new(name, values)))
+			.map(|(name, values)| Analysis::from(Series::new((*name).into(), values)))
 			.collect::<Vec<_>>();
 
 		normalize_dataset(method, &mut dataset, &analysis);

@@ -10,6 +10,6 @@ description = "analyze a polars Series"
 
 [dependencies]
 float = { path = "../float" }
-polars = { version = "0.41", default-features = false, features = [
+polars = { version = "0.43", default-features = false, features = [
 	"performant",
 ] }
