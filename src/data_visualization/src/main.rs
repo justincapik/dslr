@@ -13,7 +13,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 			arg!(--csv <csvname>)
 				.help("Houses csv path")
 				.value_parser(value_parser!(String))
-				.default_value("./ressources/dataset_train.csv")
+				.default_value("./datasets/train.csv")
 				.required(false),
 		)
 		.arg(
