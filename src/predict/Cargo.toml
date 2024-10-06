@@ -1,0 +1,22 @@
+[package]
+name = "predict"
+version = "0.1.0"
+edition = "2021"
+authors = [
+	"jucapik <jucapik@student.42.fr>",
+	"adelille <adelille@student.42.fr>",
+]
+description = "predict the result of a model based on logistic regression (one vs all)"
+
+[dependencies]
+float = { path = "../float" }
+load = { path = "../load" }
+model = { path = "../model" }
+analyze = { path = "../analyze" }
+hypothesis = { path = "../hypothesis" }
+hmerr = { git = "https://github.com/Alexdelia/yahmrslib.git" }
+clap = { version = "4", features = ["derive"] }
+polars = { version = "0.43", default-features = false, features = [
+	"performant",
+] }
+csv = "1.3.0"
