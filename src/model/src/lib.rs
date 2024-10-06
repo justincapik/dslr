@@ -8,17 +8,22 @@ pub struct Model {
 	pub label_name: String,
 	pub weights: HashMap<String, Vec<Float>>,
 	pub normalization_factors: Vec<(Float, Float)>,
+	pub means: Vec<Float>,
 }
 
+const MEANS_AMOUNT: usize = 1;
 const FACTOR_AMOUNT: usize = 2;
+
+const EXTRA_COL_AMOUNT: usize = MEANS_AMOUNT + FACTOR_AMOUNT;
 
 impl Model {
 	pub fn write(&self, path: &Path) -> std::io::Result<()> {
 		let mut wtr = csv::Writer::from_path(path)?;
 
-		let record_len = FACTOR_AMOUNT + self.weights.len();
+		let record_len = EXTRA_COL_AMOUNT + self.weights.len();
 
 		let mut header = Vec::with_capacity(record_len);
+		header.push("m");
 		header.push("k");
 		header.push(&self.label_name);
 
@@ -34,6 +39,8 @@ impl Model {
 
 		for i in 0..self.normalization_factors.len() {
 			let mut record: Vec<String> = Vec::with_capacity(record_len);
+
+			record.push(self.means[i].to_string());
 
 			record.push(self.normalization_factors[i].0.to_string());
 			record.push(self.normalization_factors[i].1.to_string());
@@ -59,7 +66,7 @@ impl Model {
 			.map_err(|e| ioe!(path.to_string_lossy(), e))?
 			.iter()
 			.map(|s| s.to_string())
-			.skip(FACTOR_AMOUNT - 1);
+			.skip(EXTRA_COL_AMOUNT - 1);
 
 		model.label_name = header
 			.next()
@@ -99,6 +106,8 @@ impl Model {
 
 			let mut record = record.iter();
 
+			model.means.push(parse_cell(record.next())?);
+
 			model
 				.normalization_factors
 				.push((parse_cell(record.next())?, parse_cell(record.next())?));
@@ -131,6 +140,7 @@ mod test {
 			.into_iter()
 			.collect(),
 			normalization_factors: vec![(1.0, 2.0), (3.0, 4.0)],
+			means: vec![0.5, 1.5],
 		};
 
 		let path = Path::new("/tmp/cargo_test_dslr_model.csv");
@@ -145,5 +155,6 @@ mod test {
 			model.normalization_factors,
 			read_model.normalization_factors
 		);
+		assert_eq!(model.means, read_model.means);
 	}
 }
