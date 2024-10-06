@@ -12,7 +12,6 @@ description = "predict the result of a model based on logistic regression (one v
 float = { path = "../float" }
 load = { path = "../load" }
 model = { path = "../model" }
-analyze = { path = "../analyze" }
 hypothesis = { path = "../hypothesis" }
 hmerr = { git = "https://github.com/Alexdelia/yahmrslib.git" }
 clap = { version = "4", features = ["derive"] }
