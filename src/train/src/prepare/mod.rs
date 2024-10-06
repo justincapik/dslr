@@ -60,24 +60,22 @@ fn store_analysis(analysis: &[Analysis], args: &Args) -> Model {
 	let mut model = Model::default();
 
 	for feature_analysis in analysis {
-		model
-			.means
-			.push(feature_analysis.mean.unwrap_or_else(|| expect("mean")));
+		let mean = feature_analysis.mean.unwrap_or_else(|| expect("mean"));
+		model.means.push(mean);
 
 		match args.normalization {
 			Normalization::MinMax => {
-				model.normalization_factors.push((
-					feature_analysis.min.unwrap_or_else(|| expect("min")),
-					feature_analysis.max.unwrap_or_else(|| expect("max")),
-				));
+				let min = feature_analysis.min.unwrap_or_else(|| expect("min"));
+				let max = feature_analysis.max.unwrap_or_else(|| expect("max"));
+
+				model.normalization_factors.push((min, min - max));
 			}
 			Normalization::StdDev => {
-				model.normalization_factors.push((
-					feature_analysis.mean.unwrap_or_else(|| expect("mean")),
-					feature_analysis
-						.std
-						.unwrap_or_else(|| expect("stdandard deviation")),
-				));
+				let std = feature_analysis
+					.std
+					.unwrap_or_else(|| expect("stdandard deviation"));
+
+				model.normalization_factors.push((mean, std));
 			}
 		}
 	}
