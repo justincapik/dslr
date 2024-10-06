@@ -60,6 +60,10 @@ fn store_analysis(analysis: &[Analysis], args: &Args) -> Model {
 	let mut model = Model::default();
 
 	for feature_analysis in analysis {
+		model
+			.means
+			.push(feature_analysis.mean.unwrap_or_else(|| expect("mean")));
+
 		match args.normalization {
 			Normalization::MinMax => {
 				model.normalization_factors.push((
