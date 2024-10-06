@@ -63,7 +63,7 @@ impl Model {
 
 		model.label_name = header
 			.next()
-			.expect(format!("{path} has incorrect header", path = path.to_string_lossy()).as_str())
+			.unwrap_or_else(|| panic!("{path} has incorrect header", path = path.to_string_lossy()))
 			.to_string();
 
 		let header = header.collect::<Vec<_>>();
