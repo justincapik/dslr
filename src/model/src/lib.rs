@@ -5,6 +5,7 @@ use float::Float;
 
 #[derive(Default)]
 pub struct Model {
+	pub label_name: String,
 	pub weights: HashMap<String, Vec<Float>>,
 	pub normalization_factors: Vec<(Float, Float)>,
 }
@@ -18,8 +19,8 @@ impl Model {
 		let record_len = FACTOR_AMOUNT + self.weights.len();
 
 		let mut header = Vec::with_capacity(record_len);
-		header.push("s");
 		header.push("k");
+		header.push(&self.label_name);
 
 		let mut series: Vec<&[Float]> = Vec::with_capacity(self.weights.len());
 		for (label, thetas) in &self.weights {
@@ -53,13 +54,19 @@ impl Model {
 
 		let mut model = Model::default();
 
-		let header = rdr
+		let mut header = rdr
 			.headers()
 			.map_err(|e| ioe!(path.to_string_lossy(), e))?
 			.iter()
 			.map(|s| s.to_string())
-			.skip(FACTOR_AMOUNT)
-			.collect::<Vec<_>>();
+			.skip(FACTOR_AMOUNT - 1);
+
+		model.label_name = header
+			.next()
+			.expect(format!("{path} has incorrect header", path = path.to_string_lossy()).as_str())
+			.to_string();
+
+		let header = header.collect::<Vec<_>>();
 
 		for label in header.iter() {
 			model.weights.insert(label.to_string(), Vec::new());
@@ -116,6 +123,7 @@ mod test {
 	#[test]
 	fn test_model() {
 		let model = super::Model {
+			label_name: "some cool name".to_string(),
 			weights: vec![
 				("a".to_string(), vec![0.0, 1.0]),
 				("b".to_string(), vec![2.0, 3.0]),
@@ -131,6 +139,7 @@ mod test {
 
 		let read_model = super::Model::read(&path).unwrap();
 
+		assert_eq!(model.label_name, read_model.label_name);
 		assert_eq!(model.weights, read_model.weights);
 		assert_eq!(
 			model.normalization_factors,
