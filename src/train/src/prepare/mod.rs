@@ -25,7 +25,8 @@ pub fn prepare(args: &Args, df: DataFrame) -> (GroupedDatasets, Model) {
 
 	let mut grouped_datasets = parse::datasets(&df, &analysis);
 
-	let model = store_analysis(&analysis, args);
+	let mut model = store_analysis(&analysis, args);
+	model.label_name = label_name(&df);
 
 	normalize::normalize(args, &mut grouped_datasets, &analysis);
 
@@ -42,6 +43,15 @@ fn features_analysis(df: &DataFrame) -> Vec<Analysis> {
 	}
 
 	features_analysis
+}
+
+fn label_name(df: &DataFrame) -> String {
+	df.get_columns()
+		.iter()
+		.find(|col| col.dtype().is_string())
+		.expect("the datasets must have a string column for its label")
+		.name()
+		.to_string()
 }
 
 fn store_analysis(analysis: &[Analysis], args: &Args) -> Model {
