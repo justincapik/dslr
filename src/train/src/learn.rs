@@ -22,7 +22,7 @@ pub fn learn(arg: &Args, grouped_datasets: &GroupedDatasets, mut model: Model) -
 	model
 }
 
-fn guess(thetas: &mut Vec<Float>, rows: &GroupedDatasets, learning_rate: Float, label: &str) {
+fn guess(thetas: &mut [Float], rows: &GroupedDatasets, learning_rate: Float, label: &str) {
 	let mut sums: Vec<Float> = vec![0.0; thetas.len()];
 	let mut count = 0;
 

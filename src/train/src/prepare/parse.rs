@@ -144,8 +144,8 @@ mod tests {
 		assert_eq!(
 			grouped_datasets.get(UNKNOWN_LABEL).unwrap(),
 			&Datasets {
-				training: vec![vec![1.0, 5.0], vec![3.0, 7.0]],
-				testing: vec![vec![2.0, 6.0], vec![4.0, 8.0]]
+				training: vec![vec![1.0, 5.0], vec![4.0, 8.0]],
+				testing: vec![vec![2.0, 6.0], vec![3.0, 7.0]]
 			}
 		);
 	}

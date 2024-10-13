@@ -145,9 +145,9 @@ mod test {
 
 		let path = Path::new("/tmp/cargo_test_dslr_model.csv");
 
-		model.write(&path).unwrap();
+		model.write(path).unwrap();
 
-		let read_model = super::Model::read(&path).unwrap();
+		let read_model = super::Model::read(path).unwrap();
 
 		assert_eq!(model.label_name, read_model.label_name);
 		assert_eq!(model.weights, read_model.weights);
