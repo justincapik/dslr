@@ -2,12 +2,12 @@ use std::collections::HashMap;
 
 use analyze::Analysis;
 use float::Float;
-use polars::{frame::DataFrame, prelude::DataType};
+use polars::frame::DataFrame;
 
 use super::{Datasets, GroupedDatasets};
 
 const UNKNOWN_LABEL: &str = "UNKNOWN";
-const MOD_SPLIT_FACTOR: usize = 3;
+const MOD_SPLIT_FACTOR: usize = 2;
 
 pub fn datasets(df: &DataFrame, analysis: &[Analysis]) -> GroupedDatasets {
 	let mut grouped_datasets: GroupedDatasets = HashMap::new();
@@ -34,50 +34,25 @@ pub fn datasets(df: &DataFrame, analysis: &[Analysis]) -> GroupedDatasets {
 			}
 
 			if cell.dtype().is_float() || cell.is_null() {
-				row_data.push(
-					cell
-						// .cast(&DataType::Float32)
-						.try_extract::<f32>()
-						.unwrap_or_else(
-							|_| {
-								grouped_datasets
-									.get(label.as_ref().expect("label must be set"))
-									.map_or_else(
-										|| {
-											analysis[row_data.len()].mean.unwrap_or_else(|| {
-												panic!("float feature must have a mean")
-											})
-										},
-										|datasets| {
-											*datasets
-												.training
-												.last()
-												.expect("training must have a value")
-												.get(row_data.len())
-												.unwrap_or_else(|| {
-													panic!("float feature must have a value")
-												})
-										},
-									)
-								// .unwrap_or_else(|| {
-								// 	analysis[row_data.len()].mean.unwrap_or_else(|| {
-								// 		panic!("float feature must have a mean")
-								// 	})
-								// })
-								// .expect(
-								// 	format!("label {label:?} must be set\n{row_data:?}")
-								// 		.as_str(),
-								// )
-								// .training
-								// .last()
-								// .expect("training must have a value")
-								// .get(row_data.len())
-								// .unwrap_or_else(|| panic!("float feature must have a value"))
-							}, // analysis[row_data.len()]
-							   // 	.mean
-							   // 	.unwrap_or_else(|| panic!("float feature must have a mean")),
-						),
-				);
+				row_data.push(cell.try_extract::<Float>().unwrap_or_else(|_| {
+					grouped_datasets
+						.get(label.as_ref().expect("label must be set"))
+						.map_or_else(
+							|| {
+								analysis[row_data.len()]
+									.mean
+									.unwrap_or_else(|| panic!("float feature must have a mean"))
+							},
+							|datasets| {
+								*datasets
+									.training
+									.last()
+									.expect("training must have a value")
+									.get(row_data.len())
+									.unwrap_or_else(|| panic!("float feature must have a value"))
+							},
+						)
+				}));
 			}
 		}
 

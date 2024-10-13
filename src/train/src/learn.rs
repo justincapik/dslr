@@ -15,44 +15,30 @@ pub fn learn(arg: &Args, grouped_datasets: &GroupedDatasets, mut model: Model) -
 
 	for _ in (0..arg.iteration).progress() {
 		for (label, thetas) in &mut model.weights {
-			let mut sums: Vec<Float> = vec![0.0; thetas.len()];
-			let mut count = 0;
-
-			for (dataset_label, datasets) in grouped_datasets {
-				let truth: Float = if label == dataset_label { 1.0 } else { 0.0 };
-
-				for row in datasets.training.iter() {
-					for (i, sum) in sums.iter_mut().enumerate() {
-						*sum += (hypothesis(row, thetas) - truth) * row[i];
-					}
-				}
-
-				count += datasets.training.len();
-			}
-
-			thetas.iter_mut().zip(sums.iter()).for_each(|(theta, sum)| {
-				*theta -= arg.learning_rate * (sum / count as Float);
-			});
+			guess(thetas, grouped_datasets, arg.learning_rate, label);
 		}
 	}
 
 	model
 }
 
-/*
-fn guess(thetas: &[Float], rows: GroupedDatasets, learning_rate: Float, truth: bool) -> Vec<Float> {
-	let mut new_thetas = thetas.to_vec();
-	let truth: Float = if truth { 1.0 } else { 0.0 };
+fn guess(thetas: &mut Vec<Float>, rows: &GroupedDatasets, learning_rate: Float, label: &str) {
+	let mut sums: Vec<Float> = vec![0.0; thetas.len()];
+	let mut count = 0;
 
-	for (i, new_theta) in new_thetas.iter_mut().enumerate() {
-		let sum = rows
-			.iter()
-			.map(|row| (hypothesis(row, thetas).powi(2) - truth.powi(2)) * row[i])
-			.sum::<Float>();
+	for (dataset_label, datasets) in rows {
+		let truth = (label == dataset_label) as u8 as Float;
 
-		*new_theta -= learning_rate * (sum / rows.len() as Float);
+		for row in datasets.training.iter() {
+			for (i, sum) in sums.iter_mut().enumerate() {
+				*sum += (hypothesis(row, thetas) - truth) * row[i];
+			}
+		}
+
+		count += datasets.training.len();
 	}
 
-	new_thetas
+	thetas.iter_mut().zip(sums.iter()).for_each(|(theta, sum)| {
+		*theta -= learning_rate * (sum / count as Float);
+	});
 }
-*/
