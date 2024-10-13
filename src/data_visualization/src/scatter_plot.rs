@@ -18,8 +18,7 @@ fn make_trace(
 	let mut col: Vec<f64> = data
 		.f64()?
 		.into_iter()
-		.filter(|x| x.is_some())
-		.map(|x| x.unwrap())
+		.flatten()
 		.collect();
 
 	col.retain(|x| *x != 0.0);

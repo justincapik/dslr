@@ -16,8 +16,6 @@ pub fn load_as_cols(filename: &str) -> PolarsResult<DataFrame> {
 pub fn transform_data(df: &mut DataFrame) -> PolarsResult<()> {
 	// convert and add date columns
 
-	// let mut rng = rand::thread_rng();
-
 	let birth_year: Series = df
 		.column("Birthday")?
 		.clone()

@@ -18,8 +18,7 @@ fn make_histogram_trace(
 	let mut col: Vec<f64> = data
 		.f64()?
 		.into_iter()
-		.filter(|x| x.is_some())
-		.map(|x| x.unwrap())
+		.flatten()
 		.collect();
 
 	col.retain(|x| *x != 0.0);
@@ -51,14 +50,12 @@ fn make_scatter_trace(
 	let mut mcol: Vec<f64> = mdata
 		.f64()?
 		.into_iter()
-		.filter(|x| x.is_some())
-		.map(|x| x.unwrap())
+		.flatten()
 		.collect();
 	let mut scol: Vec<f64> = sdata
 		.f64()?
 		.into_iter()
-		.filter(|x| x.is_some())
-		.map(|x| x.unwrap())
+		.flatten()
 		.collect();
 
 	mcol.retain(|x| *x != 0.0);
@@ -101,7 +98,7 @@ fn write_histogram_trace(
 		.y_anchor(Anchor::Top)
 		.x_anchor(Anchor::Center)
 		.show_arrow(false)
-		.text(format!("{}", main_name));
+		.text(main_name);
 	match make_histogram_trace(i, mseries, house_name) {
 		Err(_) => (),
 		Ok(mut trace) => {

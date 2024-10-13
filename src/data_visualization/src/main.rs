@@ -1,3 +1,5 @@
+#![allow(clippy::too_many_arguments)]
+
 use std::error::Error;
 
 mod histogram;
@@ -45,12 +47,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 	let Ok(mut data) = parse_cols::load_as_cols(filename) else {
 		return Err("Invalid file".into());
 	};
-
-	// TODO: polars_core::frame::DataFrame and
-	// polare::prelude::DataFrame clash, but both seem to be the same
-	// Alex sos
-	// the rest works though
-	// let mut data = load::load(filename)?;
 
 	parse_cols::transform_data(&mut data)?;
 
