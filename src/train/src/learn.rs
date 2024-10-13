@@ -23,7 +23,7 @@ pub fn learn(arg: &Args, grouped_datasets: &GroupedDatasets, mut model: Model) -
 
 				for row in datasets.training.iter() {
 					for (i, sum) in sums.iter_mut().enumerate() {
-						*sum += (hypothesis(row, thetas).powi(2) - truth.powi(2)) * row[i];
+						*sum += (hypothesis(row, thetas) - truth) * row[i];
 					}
 				}
 
