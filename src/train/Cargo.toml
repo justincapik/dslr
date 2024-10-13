@@ -1,19 +1,22 @@
 [package]
-name = "describe"
+name = "train"
 version = "0.1.0"
 edition = "2021"
 authors = [
 	"jucapik <jucapik@student.42.fr>",
 	"adelille <adelille@student.42.fr>",
 ]
-description = "describe data from a csv (mean, std, min, max, etc.)"
+description = "train model based on logistic regression (one vs all)"
 
 [dependencies]
 float = { path = "../float" }
 load = { path = "../load" }
+model = { path = "../model" }
 analyze = { path = "../analyze" }
+hypothesis = { path = "../hypothesis" }
 clap = { version = "4", features = ["derive"] }
 polars = { version = "0.43", default-features = false, features = [
 	"performant",
 ] }
+indicatif = "0.17"
 tabled = { git = "https://github.com/zhiburt/tabled.git" }
