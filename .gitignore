@@ -1,4 +1,12 @@
 ### project specific ###
+# binary files
+describe
+histogram
+scatter_plot
+pair_plot
+logreg_train
+logreg_predict
+
 # graphs output
 *.png
 
