@@ -13,11 +13,7 @@ fn make_trace(
 	data: &Series,
 	house_name: &str,
 ) -> Result<Box<Histogram<f64>>, Box<dyn Error>> {
-	let mut col: Vec<f64> = data
-		.f64()?
-		.into_iter()
-		.flatten()
-		.collect();
+	let mut col: Vec<f64> = data.f64()?.into_iter().flatten().collect();
 
 	col.retain(|x| *x != 0.0);
 	if col.is_empty() {

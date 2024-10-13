@@ -15,11 +15,7 @@ fn make_histogram_trace(
 	house_name: &str,
 ) -> Result<Box<Histogram<f64>>, Box<dyn Error>> {
 	//
-	let mut col: Vec<f64> = data
-		.f64()?
-		.into_iter()
-		.flatten()
-		.collect();
+	let mut col: Vec<f64> = data.f64()?.into_iter().flatten().collect();
 
 	col.retain(|x| *x != 0.0);
 	if col.is_empty() {
@@ -47,16 +43,8 @@ fn make_scatter_trace(
 	house_name: &str,
 ) -> Result<Box<Scatter<f64, f64>>, Box<dyn Error>> {
 	//
-	let mut mcol: Vec<f64> = mdata
-		.f64()?
-		.into_iter()
-		.flatten()
-		.collect();
-	let mut scol: Vec<f64> = sdata
-		.f64()?
-		.into_iter()
-		.flatten()
-		.collect();
+	let mut mcol: Vec<f64> = mdata.f64()?.into_iter().flatten().collect();
+	let mut scol: Vec<f64> = sdata.f64()?.into_iter().flatten().collect();
 
 	mcol.retain(|x| *x != 0.0);
 	scol.retain(|x| *x != 0.0);
