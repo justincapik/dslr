@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use float::Float;
 use hypothesis::hypothesis;
 use indicatif::ProgressIterator;
@@ -16,40 +14,33 @@ pub fn learn(arg: &Args, grouped_datasets: &GroupedDatasets, mut model: Model) -
 	}
 
 	for _ in (0..arg.iteration).progress() {
-		let mut new_thetas: HashMap<String, Vec<Float>> = HashMap::new();
+		for (label, thetas) in &mut model.weights {
+			let mut sums: Vec<Float> = vec![0.0; thetas.len()];
+			let mut count = 0;
 
-		for (label, datasets) in grouped_datasets {
-			for (model_label, thetas) in &model.weights {
-				let updated_thetas = guess(
-					thetas,
-					&datasets.training,
-					arg.learning_rate,
-					label == model_label,
-				);
+			for (dataset_label, datasets) in grouped_datasets {
+				let truth: Float = if label == dataset_label { 1.0 } else { 0.0 };
 
-				let entry = new_thetas
-					.entry(model_label.to_owned())
-					.or_insert_with(|| vec![0.0; thetas.len()]);
-				entry
-					.iter_mut()
-					.zip(updated_thetas.iter())
-					.for_each(|(a, b)| *a += b);
+				for row in datasets.training.iter() {
+					for (i, sum) in sums.iter_mut().enumerate() {
+						*sum += (hypothesis(row, thetas).powi(2) - truth.powi(2)) * row[i];
+					}
+				}
+
+				count += datasets.training.len();
 			}
-		}
 
-		for (label, thetas) in new_thetas {
-			let thetas = thetas
-				.iter()
-				.map(|theta| theta / grouped_datasets.len() as Float)
-				.collect();
-			model.weights.insert(label, thetas);
+			thetas.iter_mut().zip(sums.iter()).for_each(|(theta, sum)| {
+				*theta -= arg.learning_rate * (sum / count as Float);
+			});
 		}
 	}
 
 	model
 }
 
-fn guess(thetas: &[Float], rows: &[Vec<Float>], learning_rate: Float, truth: bool) -> Vec<Float> {
+/*
+fn guess(thetas: &[Float], rows: GroupedDatasets, learning_rate: Float, truth: bool) -> Vec<Float> {
 	let mut new_thetas = thetas.to_vec();
 	let truth: Float = if truth { 1.0 } else { 0.0 };
 
@@ -64,3 +55,4 @@ fn guess(thetas: &[Float], rows: &[Vec<Float>], learning_rate: Float, truth: boo
 
 	new_thetas
 }
+*/
