@@ -6,7 +6,7 @@
 #    By: adelille <adelille@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2020/11/30 19:21:49 by adelille          #+#    #+#              #
-#    Updated: 2024/10/06 16:04:25 by adelille         ###   ########.fr        #
+#    Updated: 2024/10/13 19:34:24 by adelille         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ NAME_PART_3_PREDICT =			predict
 NAME_PART_3_PREDICT_FINAL_BIN =	logreg_predict
 
 NAME_MODEL =					model.csv
-NAME_RESULT =					result.csv
+NAME_RESULT =					houses.csv
 
 CC =	cargo
 RM = 	rm -rf
