@@ -4,12 +4,14 @@ members = [
 	"src/load",
 	"src/analyze",
 	"src/describe",
+    "src/data_visualization",
 	"src/model",
 	"src/hypothesis",
 	"src/train",
 	"src/predict",
 ]
 resolver = "2"
+
 
 [profile.dev]
 opt-level = 1

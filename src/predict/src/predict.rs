@@ -49,7 +49,6 @@ fn construct_row(
 			let feature_idx = row_data.len();
 
 			let x = cell
-				.cast(&DataType::Float32)
 				.try_extract::<Float>()
 				.unwrap_or(model.means[feature_idx]);
 

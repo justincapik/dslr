@@ -2,15 +2,15 @@ use std::collections::HashMap;
 
 use analyze::Analysis;
 use float::Float;
-use polars::{frame::DataFrame, prelude::DataType};
+use polars::frame::DataFrame;
 
 use super::{Datasets, GroupedDatasets};
 
 const UNKNOWN_LABEL: &str = "UNKNOWN";
-const MOD_SPLIT_FACTOR: usize = 3;
+const MOD_SPLIT_FACTOR: usize = 2;
 
 pub fn datasets(df: &DataFrame, analysis: &[Analysis]) -> GroupedDatasets {
-	let mut grouped_datasets = HashMap::new();
+	let mut grouped_datasets: GroupedDatasets = HashMap::new();
 
 	let capacity = get_capacity(df);
 
@@ -34,15 +34,25 @@ pub fn datasets(df: &DataFrame, analysis: &[Analysis]) -> GroupedDatasets {
 			}
 
 			if cell.dtype().is_float() || cell.is_null() {
-				row_data.push(
-					cell.cast(&DataType::Float32)
-						.try_extract::<Float>()
-						.unwrap_or(
-							analysis[row_data.len()]
-								.mean
-								.unwrap_or_else(|| panic!("float feature must have a mean")),
-						),
-				);
+				row_data.push(cell.try_extract::<Float>().unwrap_or_else(|_| {
+					grouped_datasets
+						.get(label.as_ref().expect("label must be set"))
+						.map_or_else(
+							|| {
+								analysis[row_data.len()]
+									.mean
+									.unwrap_or_else(|| panic!("float feature must have a mean"))
+							},
+							|datasets| {
+								*datasets
+									.training
+									.last()
+									.expect("training must have a value")
+									.get(row_data.len())
+									.unwrap_or_else(|| panic!("float feature must have a value"))
+							},
+						)
+				}));
 			}
 		}
 
@@ -134,8 +144,8 @@ mod tests {
 		assert_eq!(
 			grouped_datasets.get(UNKNOWN_LABEL).unwrap(),
 			&Datasets {
-				training: vec![vec![1.0, 5.0], vec![3.0, 7.0]],
-				testing: vec![vec![2.0, 6.0], vec![4.0, 8.0]]
+				training: vec![vec![1.0, 5.0], vec![4.0, 8.0]],
+				testing: vec![vec![2.0, 6.0], vec![3.0, 7.0]]
 			}
 		);
 	}
