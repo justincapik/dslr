@@ -8,6 +8,7 @@ members = [
 	"src/model",
 	"src/hypothesis",
 	"src/train",
+	"src/predict",
 ]
 resolver = "2"
 

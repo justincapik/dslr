@@ -212,7 +212,7 @@ mod tests {
 			median: Some(0.5),
 			q1: Some(-5.0),
 			q3: Some(2.0),
-			std: Some(376.64162896135986),
+			std: Some(376.641_63),
 			sum: Some(957.0),
 		};
 
@@ -244,7 +244,7 @@ mod tests {
 			median: Some(3.0),
 			q1: Some(1.0),
 			q3: Some(5.0),
-			std: Some(1.632993161855452),
+			std: Some(1.632_993_2),
 			sum: Some(9.0),
 		};
 

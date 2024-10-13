@@ -5,21 +5,27 @@ use float::Float;
 
 #[derive(Default)]
 pub struct Model {
+	pub label_name: String,
 	pub weights: HashMap<String, Vec<Float>>,
 	pub normalization_factors: Vec<(Float, Float)>,
+	pub means: Vec<Float>,
 }
 
+const MEANS_AMOUNT: usize = 1;
 const FACTOR_AMOUNT: usize = 2;
+
+const EXTRA_COL_AMOUNT: usize = MEANS_AMOUNT + FACTOR_AMOUNT;
 
 impl Model {
 	pub fn write(&self, path: &Path) -> std::io::Result<()> {
 		let mut wtr = csv::Writer::from_path(path)?;
 
-		let record_len = FACTOR_AMOUNT + self.weights.len();
+		let record_len = EXTRA_COL_AMOUNT + self.weights.len();
 
 		let mut header = Vec::with_capacity(record_len);
-		header.push("s");
+		header.push("m");
 		header.push("k");
+		header.push(&self.label_name);
 
 		let mut series: Vec<&[Float]> = Vec::with_capacity(self.weights.len());
 		for (label, thetas) in &self.weights {
@@ -33,6 +39,8 @@ impl Model {
 
 		for i in 0..self.normalization_factors.len() {
 			let mut record: Vec<String> = Vec::with_capacity(record_len);
+
+			record.push(self.means[i].to_string());
 
 			record.push(self.normalization_factors[i].0.to_string());
 			record.push(self.normalization_factors[i].1.to_string());
@@ -53,13 +61,19 @@ impl Model {
 
 		let mut model = Model::default();
 
-		let header = rdr
+		let mut header = rdr
 			.headers()
 			.map_err(|e| ioe!(path.to_string_lossy(), e))?
 			.iter()
 			.map(|s| s.to_string())
-			.skip(FACTOR_AMOUNT)
-			.collect::<Vec<_>>();
+			.skip(EXTRA_COL_AMOUNT - 1);
+
+		model.label_name = header
+			.next()
+			.unwrap_or_else(|| panic!("{path} has incorrect header", path = path.to_string_lossy()))
+			.to_string();
+
+		let header = header.collect::<Vec<_>>();
 
 		for label in header.iter() {
 			model.weights.insert(label.to_string(), Vec::new());
@@ -92,6 +106,8 @@ impl Model {
 
 			let mut record = record.iter();
 
+			model.means.push(parse_cell(record.next())?);
+
 			model
 				.normalization_factors
 				.push((parse_cell(record.next())?, parse_cell(record.next())?));
@@ -116,6 +132,7 @@ mod test {
 	#[test]
 	fn test_model() {
 		let model = super::Model {
+			label_name: "some cool name".to_string(),
 			weights: vec![
 				("a".to_string(), vec![0.0, 1.0]),
 				("b".to_string(), vec![2.0, 3.0]),
@@ -123,18 +140,21 @@ mod test {
 			.into_iter()
 			.collect(),
 			normalization_factors: vec![(1.0, 2.0), (3.0, 4.0)],
+			means: vec![0.5, 1.5],
 		};
 
 		let path = Path::new("/tmp/cargo_test_dslr_model.csv");
 
-		model.write(&path).unwrap();
+		model.write(path).unwrap();
 
-		let read_model = super::Model::read(&path).unwrap();
+		let read_model = super::Model::read(path).unwrap();
 
+		assert_eq!(model.label_name, read_model.label_name);
 		assert_eq!(model.weights, read_model.weights);
 		assert_eq!(
 			model.normalization_factors,
 			read_model.normalization_factors
 		);
+		assert_eq!(model.means, read_model.means);
 	}
 }
