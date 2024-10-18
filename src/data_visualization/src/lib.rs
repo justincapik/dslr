@@ -2,6 +2,7 @@ pub mod args;
 pub mod feature;
 pub mod layout;
 pub mod populate;
+pub mod trace;
 
 mod annotation;
 pub use annotation::annotation;

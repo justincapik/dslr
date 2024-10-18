@@ -1,4 +1,5 @@
 use plotly::color::NamedColor;
+use polars::frame::DataFrame;
 
 use super::LABEL_NAME;
 
@@ -35,12 +36,24 @@ impl std::str::FromStr for Label {
 }
 
 impl Label {
-	pub fn color(&self) -> NamedColor {
+	fn color(&self) -> NamedColor {
 		match self {
 			Label::Ravenclaw => NamedColor::Blue,
 			Label::Slytherin => NamedColor::Green,
 			Label::Hufflepuff => NamedColor::Orange,
 			Label::Gryffindor => NamedColor::Red,
 		}
+	}
+
+	pub fn extract(df: &DataFrame) -> Result<(String, NamedColor), String> {
+		let label = df
+			.column(LABEL_NAME)
+			.expect("Label column not found")
+			.iter()
+			.next()
+			.expect("Series is empty");
+		let label: Label = label.get_str().unwrap_or("").parse()?;
+
+		Ok((label.to_string(), label.color()))
 	}
 }

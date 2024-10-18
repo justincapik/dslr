@@ -1,6 +1,8 @@
+use polars::series::Series;
+
 /// since the error is never critical, thus for optimization:
 /// feature::parse() is not returning a descriptive error
-pub fn parse(series: Series) -> Result<Vec<f64>, ()> {
+pub fn parse(series: &Series) -> Result<Vec<f64>, ()> {
 	let Ok(feature) = series.f64() else {
 		return Err(());
 	};
