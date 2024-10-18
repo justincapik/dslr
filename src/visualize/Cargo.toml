@@ -17,11 +17,11 @@ name = "histogram"
 path = "src/histogram.rs"
 
 [[bin]]
-name = "scatter"
+name = "scatter_plot"
 path = "src/scatter.rs"
 
 [[bin]]
-name = "pair"
+name = "pair_plot"
 path = "src/pair.rs"
 
 [dependencies]
