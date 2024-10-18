@@ -10,11 +10,16 @@ pub fn histogram(
 	color: NamedColor,
 	plot_index: usize,
 ) -> Box<Histogram<f64>> {
-	Histogram::new(col)
+	let mut ret = Histogram::new(col)
 		.marker(Marker::new().color(color))
 		.x_axis(format!("x{plot_index}"))
-		.y_axis(format!("y{plot_index}"))
-		.name(label)
+		.y_axis(format!("y{plot_index}"));
+
+	if plot_index == 1 {
+		ret = ret.name(label);
+	}
+
+	ret
 }
 
 pub fn scatter(
@@ -24,10 +29,15 @@ pub fn scatter(
 	color: NamedColor,
 	plot_index: usize,
 ) -> Box<Scatter<f64, f64>> {
-	Scatter::new(t, y)
+	let mut ret = Scatter::new(t, y)
 		.mode(Mode::Markers)
 		.marker(Marker::new().color(color).size(3))
 		.x_axis(format!("x{plot_index}"))
-		.y_axis(format!("y{plot_index}"))
-		.name(label)
+		.y_axis(format!("y{plot_index}"));
+
+	if plot_index == 1 {
+		ret = ret.name(label);
+	}
+
+	ret
 }

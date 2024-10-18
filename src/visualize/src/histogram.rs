@@ -39,7 +39,7 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 			plot.add_trace(trace::histogram(col, &label, color, plot_index));
 
 			if i == 0 {
-				layout.add_annotation(annotation(plot_index, &label));
+				layout.add_annotation(annotation(plot_index, series.name()));
 			}
 
 			plot_index += 1;

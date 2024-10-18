@@ -31,7 +31,11 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 
 	let mut layout = layout::build(PlotType::Pair, USEFUL_FEATURES.len());
 
-	for df_label in dataset.partition_by([LABEL_NAME], true)? {
+	for (i, df_label) in dataset
+		.partition_by([LABEL_NAME], true)?
+		.into_iter()
+		.enumerate()
+	{
 		let mut plot_index = 1;
 
 		let (label, color) = Label::extract(&df_label)?;
@@ -62,7 +66,9 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 					plot.add_trace(trace::scatter(x, y, &label, color, plot_index));
 				}
 
-				layout.add_annotation(annotation(plot_index, &format!("{name_y} vs {name_x}")));
+				if i == 0 {
+					layout.add_annotation(annotation(plot_index, &format!("{name_y} vs {name_x}")));
+				}
 
 				plot_index += 1;
 			}
