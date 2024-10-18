@@ -71,7 +71,7 @@ check:
 	$(CC) clippy --all-features -- -D warnings
 	$(CC) fmt --check
 	$(CC) test --all-features
-	
+
 clean:
 	$(CC) clean
 
