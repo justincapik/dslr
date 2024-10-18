@@ -16,6 +16,14 @@ path = "src/lib.rs"
 name = "histogram"
 path = "src/histogram.rs"
 
+[[bin]]
+name = "scatter"
+path = "src/scatter.rs"
+
+[[bin]]
+name = "pair"
+path = "src/pair.rs"
+
 [dependencies]
 load = { path = "../load" }
 clap = { version = "4", features = ["cargo"] }
