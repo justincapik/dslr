@@ -48,14 +48,14 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 					continue;
 				}
 
-				let Ok(y) = feature::parse(series_y) else {
+				let Some(y) = feature::parse(series_y) else {
 					continue;
 				};
 
 				if name_x == name_y {
 					plot.add_trace(trace::histogram(y, &label, color, plot_index));
 				} else {
-					let Ok(x) = feature::parse(series_x) else {
+					let Some(x) = feature::parse(series_x) else {
 						continue;
 					};
 

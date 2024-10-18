@@ -28,7 +28,7 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 		let (label, color) = Label::extract(&df_label)?;
 
 		for series in df_label.get_columns() {
-			let Ok(y) = feature::parse(series) else {
+			let Some(y) = feature::parse(series) else {
 				continue;
 			};
 
