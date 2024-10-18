@@ -8,7 +8,7 @@ use visualize::{
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
-	let args = args::parse("histogram.png");
+	let args = args::parse("scatter_plot.png");
 
 	let mut dataset = load::load(args.csv)?;
 
@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Error>> {
 	let mut plot = Plot::new();
 
-	let mut layout = layout::build(PlotType::Histogram);
+	let mut layout = layout::build(PlotType::Scatter, 4);
 
 	for df_label in dataset.partition_by([LABEL_NAME], true)? {
 		let mut plot_index = 1;
@@ -28,11 +28,13 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 		let (label, color) = Label::extract(&df_label)?;
 
 		for series in df_label.get_columns() {
-			let Ok(col) = feature::parse(series) else {
+			let Ok(y) = feature::parse(series) else {
 				continue;
 			};
 
-			plot.add_trace(trace::histogram(col, &label, color, plot_index));
+			let t: Vec<f64> = y.iter().copied().rev().collect();
+
+			plot.add_trace(trace::scatter(t, y, &label, color, plot_index));
 
 			layout.add_annotation(annotation(plot_index, &label));
 

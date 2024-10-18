@@ -7,12 +7,12 @@ use plotly::{
 	Layout,
 };
 
-pub fn build(plot_type: PlotType) -> Layout {
+pub fn build(plot_type: PlotType, size: usize) -> Layout {
 	Layout::new()
 		.grid(
 			LayoutGrid::new()
-				.rows(4)
-				.columns(4)
+				.rows(size)
+				.columns(size)
 				.pattern(GridPattern::Independent),
 		)
 		.legend(

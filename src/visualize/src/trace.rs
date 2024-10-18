@@ -18,14 +18,12 @@ pub fn histogram(
 }
 
 pub fn scatter(
-	col: Vec<f64>,
+	t: Vec<f64>,
+	y: Vec<f64>,
 	label: &str,
 	color: NamedColor,
 	plot_index: usize,
 ) -> Box<Scatter<f64, f64>> {
-	let t: Vec<f64> = col.iter().copied().rev().collect();
-	let y = col;
-
 	Scatter::new(t, y)
 		.mode(Mode::Markers)
 		.marker(Marker::new().color(color).size(3))
