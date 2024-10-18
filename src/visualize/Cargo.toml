@@ -1,0 +1,36 @@
+[package]
+name = "visualize"
+version = "0.1.0"
+edition = "2021"
+authors = [
+	"jucapik <jucapik@student.42.fr>",
+	"adelille <adelille@student.42.fr>",
+]
+description = "create histograms, scatter and pair plots visualizations of training dataset"
+
+[lib]
+name = "visualize"
+path = "src/lib.rs"
+
+[[bin]]
+name = "histogram"
+path = "src/histogram.rs"
+
+[[bin]]
+name = "scatter_plot"
+path = "src/scatter.rs"
+
+[[bin]]
+name = "pair_plot"
+path = "src/pair.rs"
+
+[dependencies]
+load = { path = "../load" }
+clap = { version = "4", features = ["cargo"] }
+plotly = { version = "0.10", features = ["kaleido"] }
+plotly_kaleido = "0.10"
+polars = { version = "0.43", default-features = false, features = [
+	"performant",
+	"partition_by",
+] }
+rand_distr = "0.4.3"
