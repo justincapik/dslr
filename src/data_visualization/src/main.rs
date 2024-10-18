@@ -10,7 +10,7 @@ mod scatter_plot;
 use clap::{arg, command, value_parser};
 
 fn main() -> Result<(), Box<dyn Error>> {
-	let args = command!() // requires `cargo` feature
+	let args = command!()
 		.arg(
 			arg!(--csv <csvname>)
 				.help("Houses csv path")
