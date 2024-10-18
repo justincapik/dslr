@@ -60,7 +60,7 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 					plot.add_trace(trace::histogram(y, &label, color, plot_index));
 
 					if i == 0 {
-						layout.add_annotation(annotation(plot_index, &name_y));
+						layout.add_annotation(annotation(plot_index, name_y));
 					}
 				} else {
 					let Some(x) = feature::parse(series_x) else {

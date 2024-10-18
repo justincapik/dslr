@@ -29,7 +29,7 @@ pub fn scatter(
 	color: NamedColor,
 	plot_index: usize,
 ) -> Box<Scatter<f64, f64>> {
-	let mut ret = Scatter::new(t, y)
+	let ret = Scatter::new(t, y)
 		.mode(Mode::Markers)
 		.marker(Marker::new().color(color).size(3))
 		.x_axis(format!("x{plot_index}"))
@@ -40,6 +40,4 @@ pub fn scatter(
 	} else {
 		ret.show_legend(false)
 	}
-
-	ret
 }
