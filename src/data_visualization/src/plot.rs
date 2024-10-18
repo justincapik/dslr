@@ -1,21 +1,4 @@
-use std::{error::Error, path::Path};
-
-use plotly::{common::Marker, Histogram, Plot};
-use polars::prelude::*;
-
-use visualize::{annotation, args, feature, image, layout, populate, Label, PlotType, LABEL_NAME};
-
-fn main() -> Result<(), Box<dyn Error>> {
-	let args = args::parse("histogram.png");
-
-	let mut dataset = load::load(args.csv)?;
-
-	populate::date(&mut dataset)?;
-
-	plot(dataset, args.output)
-}
-
-fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Error>> {
+pub fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Error>> {
 	let mut plot = Plot::new();
 
 	let mut layout = layout::build(PlotType::Histogram);
@@ -34,9 +17,19 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 		let label = label.to_string();
 
 		for series in df_label.get_columns() {
-			let Ok(col) = feature::parse(series) else {
+			let Ok(feature) = series.f64() else {
 				continue;
 			};
+
+			let col: Vec<f64> = feature
+				.into_iter()
+				.flatten()
+				.filter(|x| *x != 0.0)
+				.collect::<Vec<f64>>();
+
+			if col.is_empty() {
+				continue;
+			}
 
 			plot.add_trace(
 				Histogram::new(col)

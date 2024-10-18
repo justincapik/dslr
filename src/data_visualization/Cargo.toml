@@ -1,20 +1,28 @@
 [package]
-name = "data_visualization"
+name = "visualize"
 version = "0.1.0"
 edition = "2021"
+authors = [
+	"jucapik <jucapik@student.42.fr>",
+	"adelille <adelille@student.42.fr>",
+]
+description = "create histograms, scatter and pair plots visualizations of training dataset"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "visualize"
+path = "src/lib.rs"
+
+[[bin]]
+name = "histogram"
+path = "src/histogram.rs"
 
 [dependencies]
 load = { path = "../load" }
 clap = { version = "4", features = ["cargo"] }
 plotly = { version = "0.10", features = ["kaleido"] }
 plotly_kaleido = "0.10"
-polars = { version = "0.43", features = [
-	"csv",
-	"lazy",
+polars = { version = "0.43", default-features = false, features = [
 	"performant",
-	"dtype-datetime",
-	"strings",
+	"partition_by",
 ] }
 rand_distr = "0.4.3"
