@@ -58,16 +58,23 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 
 				if name_x == name_y {
 					plot.add_trace(trace::histogram(y, &label, color, plot_index));
+
+					if i == 0 {
+						layout.add_annotation(annotation(plot_index, &name_y));
+					}
 				} else {
 					let Some(x) = feature::parse(series_x) else {
 						continue;
 					};
 
 					plot.add_trace(trace::scatter(x, y, &label, color, plot_index));
-				}
 
-				if i == 0 {
-					layout.add_annotation(annotation(plot_index, &format!("{name_y} vs {name_x}")));
+					if i == 0 {
+						layout.add_annotation(annotation(
+							plot_index,
+							&format!("{name_y} vs {name_x}"),
+						));
+					}
 				}
 
 				plot_index += 1;

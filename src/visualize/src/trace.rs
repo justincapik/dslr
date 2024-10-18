@@ -10,16 +10,16 @@ pub fn histogram(
 	color: NamedColor,
 	plot_index: usize,
 ) -> Box<Histogram<f64>> {
-	let mut ret = Histogram::new(col)
+	let ret = Histogram::new(col)
 		.marker(Marker::new().color(color))
 		.x_axis(format!("x{plot_index}"))
 		.y_axis(format!("y{plot_index}"));
 
 	if plot_index == 1 {
-		ret = ret.name(label);
+		ret.name(label)
+	} else {
+		ret.show_legend(false)
 	}
-
-	ret
 }
 
 pub fn scatter(
@@ -36,7 +36,9 @@ pub fn scatter(
 		.y_axis(format!("y{plot_index}"));
 
 	if plot_index == 1 {
-		ret = ret.name(label);
+		ret.name(label)
+	} else {
+		ret.show_legend(false)
 	}
 
 	ret
