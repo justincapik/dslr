@@ -1,11 +1,9 @@
-use std::{error::Error, path::Path};
+use std::{error::Error, path::PathBuf};
 
 use plotly::Plot;
 use polars::prelude::*;
 
-use visualize::{
-	annotation, args, feature, image, layout, populate, trace, Label, PlotType, LABEL_NAME,
-};
+use visualize::{annotation, args, feature, image, layout, trace, Label, PlotType, LABEL_NAME};
 
 const USEFUL_FEATURES: [&str; 6] = [
 	"Divination",
@@ -15,21 +13,28 @@ const USEFUL_FEATURES: [&str; 6] = [
 	"Charms",
 	"Flying",
 ];
+const EXPECTED_FEATURES_LEN: usize = 13;
 
 fn main() -> Result<(), Box<dyn Error>> {
 	let args = args::parse("pair_plot.png");
 
-	let mut dataset = load::load(args.csv)?;
+	let dataset = load::load(args.csv)?;
 
-	populate::date(&mut dataset)?;
+	plot(&dataset, args.output.clone(), false)?;
+	plot(&dataset, args.output, true)?;
 
-	plot(dataset, args.output)
+	Ok(())
 }
 
-fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Error>> {
+fn plot(dataset: &DataFrame, output: PathBuf, all_features: bool) -> Result<(), Box<dyn Error>> {
 	let mut plot = Plot::new();
 
-	let mut layout = layout::build(PlotType::Pair, USEFUL_FEATURES.len());
+	let size = if all_features {
+		EXPECTED_FEATURES_LEN
+	} else {
+		USEFUL_FEATURES.len()
+	};
+	let mut layout = layout::build(PlotType::Pair, size);
 
 	for (i, df_label) in dataset
 		.partition_by([LABEL_NAME], true)?
@@ -42,13 +47,13 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 
 		for series_y in df_label.get_columns() {
 			let name_y = series_y.name();
-			if !USEFUL_FEATURES.contains(&name_y.as_str()) {
+			if !all_features && !USEFUL_FEATURES.contains(&name_y.as_str()) {
 				continue;
 			}
 
 			for series_x in df_label.get_columns() {
 				let name_x = series_x.name();
-				if !USEFUL_FEATURES.contains(&name_x.as_str()) {
+				if !all_features && !USEFUL_FEATURES.contains(&name_x.as_str()) {
 					continue;
 				}
 
@@ -85,12 +90,31 @@ fn plot<P: AsRef<Path>>(dataset: DataFrame, output: P) -> Result<(), Box<dyn Err
 	plot.set_layout(layout);
 
 	plot.write_image(
-		output,
+		get_output(output, all_features),
 		image::FORMAT,
-		((image::WIDTH as f64) * 1.25) as usize,
-		((image::HEIGHT as f64) * 1.25) as usize,
+		((image::WIDTH as f64) / 4.0 * size as f64) as usize,
+		((image::HEIGHT as f64) / 4.0 * size as f64) as usize,
 		image::SCALE,
 	);
 
 	Ok(())
+}
+
+fn get_output(output: PathBuf, all_features: bool) -> PathBuf {
+	if !all_features {
+		return output;
+	}
+
+	let Some(filename) = output.file_stem() else {
+		return output;
+	};
+
+	PathBuf::from(format!(
+		"{}_complete.{}",
+		filename.to_string_lossy(),
+		output
+			.extension()
+			.unwrap_or_else(|| "".as_ref())
+			.to_string_lossy()
+	))
 }
