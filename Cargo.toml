@@ -4,7 +4,7 @@ members = [
 	"src/load",
 	"src/analyze",
 	"src/describe",
-    "src/data_visualization",
+	"src/visualize",
 	"src/model",
 	"src/hypothesis",
 	"src/train",

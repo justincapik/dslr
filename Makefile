@@ -71,21 +71,21 @@ check:
 	$(CC) clippy --all-features -- -D warnings
 	$(CC) fmt --check
 	$(CC) test --all-features
-	
+
 clean:
 	$(CC) clean
 
 fclean:		clean
 	@$(RM) \
 		$(NAME_PART_1_DESCRIBE) \
-
+\
 		$(NAME_PART_2_HISTOGRAM) \
 		$(NAME_PART_2_SCATTER_PLOT) \
 		$(NAME_PART_2_PAIR_PLOT) \
-
+\
 		$(NAME_PART_3_TRAIN_FINAL_BIN) \
 		$(NAME_PART_3_PREDICT_FINAL_BIN) \
-
+\
 		$(NAME_MODEL) \
 		$(NAME_RESULT)
 
