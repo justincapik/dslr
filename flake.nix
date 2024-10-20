@@ -1,5 +1,5 @@
 {
-  description = "rust env flake";
+  description = "rust env for dslr 42 project";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
