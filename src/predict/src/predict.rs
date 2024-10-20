@@ -6,8 +6,12 @@ use model::Model;
 
 use crate::Args;
 
+const INDEX_COLUMN: &str = "Index";
+
 pub fn predict(args: &Args, df: DataFrame, model: &Model) -> hmerr::Result<()> {
 	let mut wtr = csv::Writer::from_path(&args.output)?;
+
+	wtr.write_record([INDEX_COLUMN, &model.label_name])?;
 
 	let capacity = get_capacity(&df);
 
