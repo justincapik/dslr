@@ -9,9 +9,9 @@ on:
 jobs:
   run:
     name: typos
-  
+
     runs-on: ubuntu-latest
-  
+
     steps:
     - name: Checkout Actions Repository
       uses: actions/checkout@v4
